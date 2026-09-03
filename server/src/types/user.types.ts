@@ -1,10 +1,13 @@
 import type { TaskItems } from "./task.types.js";
 
-export interface User {
+export interface IUser {
   firstName: string;
   lastName?: string;
   email: string;
   password: string;
+  isVerified: boolean;
+  verificationOTP: string;
+  otpExpiry?: Date | null;
   tasks: TaskItems;
   profileImg?: ProfileImg;
   resetToken?: string;

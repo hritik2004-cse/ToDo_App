@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-const loginSchema = z.object({
+export const loginSchema = z.object({
   email: z.email().transform((email) => email.trim().toLowerCase()),
-  password: z.string().min(8),
+  password: z.string().min(8).max(40),
 });
 
-export type RegisterDTO = z.infer<typeof loginSchema>;
+export type LoginDTO = z.infer<typeof loginSchema>;

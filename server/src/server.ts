@@ -1,3 +1,4 @@
+import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import env from "./config/env.config.js";
@@ -5,10 +6,12 @@ import connectDB from "./config/db.config.js";
 import userRouter from "./routes/user.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import taskRouter from "./routes/tasks.routes.js";
+import handleError from "./middlewares/error-handler.middleware.js";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({ origin: env.clientUrl, credentials: true }));
 
 app.route("/").get((req, res) => {
   return res
@@ -20,6 +23,8 @@ app.route("/").get((req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/task", taskRouter);
 app.use("/api/v1/user", userRouter);
+
+app.use(handleError);
 
 const startServer = async () => {
   try {

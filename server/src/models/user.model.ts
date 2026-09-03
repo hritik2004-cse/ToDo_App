@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import env from "../config/env.config.js";
-import type { User } from "../types/user.types.js";
+import type { IUser } from "../types/user.types.js";
 
-const userSchema = new mongoose.Schema<User>(
+const userSchema = new mongoose.Schema<IUser>(
   {
     firstName: {
       type: String,
@@ -28,6 +28,18 @@ const userSchema = new mongoose.Schema<User>(
       minlength: 8,
       maxlength: 40,
       select: false,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationOTP: {
+      type: String,
+      default: "",
+    },
+    otpExpiry: {
+      type: Date,
+      dafault: null,
     },
     profileImg: {
       publicId: {
@@ -73,4 +85,5 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, env.saltRounds);
 });
 
-const User = mongoose.model<User>("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
+export default User;
