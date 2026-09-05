@@ -6,7 +6,10 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 
 ## ✨ Features
 
-- 🔐 User authentication (Register / Login) with JWT & HTTP-only cookies
+- 🔐 User authentication (Register / Login / Logout) with HTTP-only cookies
+- 📧 Email verification via OTP (EmailJS)
+- 🔑 Forgot password & reset password flow
+- 🗑️ Delete account
 - ✅ Create, read, update, and delete tasks
 - 📌 Task status tracking (pending / completed)
 - 🌙 Dark-themed, responsive UI
@@ -37,6 +40,7 @@ To-Do_List/
 - [Node.js](https://nodejs.org/) v18+
 - [pnpm](https://pnpm.io/) v11+
 - [MongoDB](https://www.mongodb.com/) instance (local or Atlas)
+- [EmailJS](https://www.emailjs.com/) account (for OTP emails)
 
 ### 1. Clone the repository
 
@@ -55,9 +59,6 @@ pnpm install
 ### 3. Configure environment variables
 
 ```bash
-# Client
-cp client/.env.example client/.env
-
 # Server
 cp server/.env.example server/.env
 ```
@@ -85,29 +86,36 @@ cd client && pnpm dev
 
 Base URL: `/api/v1`
 
-| Route              | Description          |
-|--------------------|----------------------|
-| `POST /auth/register` | Register a new user |
-| `POST /auth/login`    | Login               |
-| `GET  /task`          | Get all tasks       |
-| `POST /task`          | Create a task       |
-| `PUT  /task/:id`      | Update a task       |
-| `DELETE /task/:id`    | Delete a task       |
-| `GET  /user`          | Get user profile    |
+| Route                             | Description                        |
+|-----------------------------------|------------------------------------|
+| `POST /auth/register`             | Register a new user                |
+| `POST /auth/login`                | Login & receive auth cookie        |
+| `POST /auth/logout`               | Logout & clear auth cookie         |
+| `POST /auth/verify-email`         | Verify email with OTP              |
+| `POST /auth/resend-verify-email`  | Resend email verification OTP      |
+| `POST /auth/forget-password`      | Request password reset OTP         |
+| `POST /auth/reset-password`       | Reset password with OTP            |
+| `DELETE /auth/delete-account`     | Delete authenticated user account  |
+| `GET  /task`                      | Get all tasks                      |
+| `POST /task`                      | Create a task                      |
+| `PUT  /task/:id`                  | Update a task                      |
+| `DELETE /task/:id`                | Delete a task                      |
+| `GET  /user`                      | Get user profile                   |
 
 ---
 
 ## 📦 Tech Stack
 
-| Layer     | Technology                        |
-|-----------|-----------------------------------|
-| Frontend  | Next.js 16, React 19, TypeScript  |
-| Styling   | Tailwind CSS v4, shadcn/ui        |
-| Backend   | Express.js v5, TypeScript         |
-| Database  | MongoDB + Mongoose                |
-| Auth      | JWT, bcrypt, HTTP-only cookies    |
-| Validation| Zod (server), TypeScript (client) |
-| Package Manager | pnpm v11 (workspaces)       |
+| Layer          | Technology                               |
+|----------------|------------------------------------------|
+| Frontend       | Next.js 16, React 19, TypeScript         |
+| Styling        | Tailwind CSS v4, shadcn/ui               |
+| Backend        | Express.js v5, TypeScript                |
+| Database       | MongoDB + Mongoose                       |
+| Auth           | bcrypt, HTTP-only cookies                |
+| Email / OTP    | EmailJS                                  |
+| Validation     | Zod (server), TypeScript (client)        |
+| Package Manager| pnpm v11 (workspaces)                    |
 
 ---
 

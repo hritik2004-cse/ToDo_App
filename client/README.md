@@ -15,7 +15,8 @@ This is the **Next.js** frontend for the ToDo App. It communicates with the Expr
 | [shadcn/ui](https://ui.shadcn.com/) | ^4 | Accessible UI components |
 | [Base UI](https://base-ui.com/) | ^1.7 | Headless UI primitives |
 | [Axios](https://axios-http.com/) | ^1.20 | HTTP client |
-| [React Icons](https://react-icons.github.io/react-icons/) | ^5.7 | Icon library |
+| [Lucide React](https://lucide.dev/) | ^1.39 | Icon library |
+| [React Icons](https://react-icons.github.io/react-icons/) | ^5.7 | Additional icons |
 | [React Toastify](https://fkhadra.github.io/react-toastify/) | ^11 | Toast notifications |
 | [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) | latest | Class name merging |
 | pnpm | 11.24.0 | Package manager |
@@ -36,6 +37,8 @@ client/
 │   │   │   └── page.tsx
 │   │   ├── register/        # Register page
 │   │   │   └── page.tsx
+│   │   ├── verify-account/  # Email OTP verification page
+│   │   │   └── page.tsx
 │   │   ├── favicon.ico
 │   │   ├── icon0.svg
 │   │   ├── icon1.png
@@ -49,10 +52,13 @@ client/
 │   │   ├── ui/              # shadcn/ui auto-generated components
 │   │   └── utility/         # Shared reusable components
 │   │       ├── Button.tsx
-│   │       └── LinkButton.tsx
+│   │       ├── LinkButton.tsx
+│   │       └── Logo.tsx
 │   ├── config/
 │   │   ├── axios.config.ts  # Axios instance with base URL & credentials
 │   │   └── env.config.ts    # Validated environment variables
+│   ├── types/               # Shared TypeScript types
+│   │   └── register.types.ts
 │   └── lib/
 │       └── utils.ts         # cn() helper (clsx + tailwind-merge)
 ├── .env                     # Environment variables (gitignored)
@@ -66,11 +72,12 @@ client/
 
 ## 🌐 Pages
 
-| Route | Page | Description |
-|---|---|---|
-| `/` | `page.tsx` | Task list — view, add, complete & delete tasks |
-| `/login` | `login/page.tsx` | User login |
-| `/register` | `register/page.tsx` | User registration |
+| Route              | Page                         | Description                                      |
+|--------------------|------------------------------|--------------------------------------------------|
+| `/`                | `page.tsx`                   | Task list — view, add, complete & delete tasks   |
+| `/login`           | `login/page.tsx`             | User login                                       |
+| `/register`        | `register/page.tsx`          | User registration                                |
+| `/verify-account`  | `verify-account/page.tsx`    | Email OTP verification after registration        |
 
 ---
 
@@ -99,13 +106,13 @@ pnpm install
 
 ### 2. Set up environment variables
 
-```bash
-cp .env.example .env
-```
+Create a `.env` file:
 
 ```env
-NEXT_PUBLIC_SERVER_URL=http://localhost:8000
+NEXT_PUBLIC_SERVER_URL=http://localhost:5000
 ```
+
+> `NEXT_PUBLIC_SERVER_URL` is validated at startup — the app will throw if it's missing.
 
 ### 3. Run development server
 
@@ -132,3 +139,13 @@ All API calls go through the configured Axios instance at `src/config/axios.conf
 - Base URL from `NEXT_PUBLIC_SERVER_URL`
 - `withCredentials: true` for cookie-based auth
 - Base path: `/api/v1`
+
+---
+
+## 🔐 Auth Flow
+
+1. **Register** → server sends a verification OTP to the user's email
+2. **Verify Account** (`/verify-account`) → user enters OTP to activate account
+3. **Login** → sets an HTTP-only auth cookie
+4. **Forgot Password** → server emails a reset OTP
+5. **Reset Password** → user submits new password with OTP
