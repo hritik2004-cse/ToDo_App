@@ -4,6 +4,7 @@ import { AppError } from "../../utils/app-error.utils.js";
 import { generateOTP, hashOTP } from "../../utils/otp.utils.js";
 import type { VerifyEmailDTO } from "../../dto/auth/verify-email.dto.js";
 import type { ResendVerifyEmailDTO } from "../../dto/auth/resend-verify-email.dto.js";
+import sendEmail from "../../config/emailjs.config.js";
 
 export const verifyEmailService = async (data: VerifyEmailDTO) => {
   const { otp } = data;
@@ -38,8 +39,22 @@ export const resendEmailVerificationService = async (
 
   const newOTP = generateOTP(6); // 6 digit otp
   const newHashedOTP = hashOTP(newOTP);
+  const expiry = new Date(Date.now() + env.otpExpiryDuration); // 15 min expiry
+  const userExpiry = expiry.toLocaleString("en-In", {
+    timeZone: "Asia/Kolkata",
+  });
 
   user.verificationOTP = newHashedOTP;
-  user.otpExpiry = new Date(Date.now() + env.otpExpiryDuration); // 15 min expiry
+  user.otpExpiry = expiry;
   await user.save();
+
+  await sendEmail({
+    templateId: env.emailjsVerifyEmailTemplateId,
+    templateParams: {
+      name: user.firstName,
+      email: user.email,
+      passcode: newOTP,
+      expiry: userExpiry,
+    },
+  });
 };

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React from "react";
 
 const basicStyles = "py-3 lg:py-4 xl:py-3 px-6 border-2 capitalize text-base lg:text-lg font-bold lg:font-black flex items-center justify-center hover:shadow-[6px_6px_0px_#6b7280] transition-all duration-300 active:scale-95";
