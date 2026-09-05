@@ -11,6 +11,7 @@ export interface IUser {
   tasks: TaskItems;
   profileImg?: ProfileImg;
   resetToken?: string;
+  refreshToken?: string;
   resetTokenExpiry?: Date | null;
   createdAt: Date;
   updatedAt: Date;

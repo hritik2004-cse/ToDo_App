@@ -13,7 +13,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: env.clientUrl, credentials: true }));
 
-app.route("/").get((req, res) => {
+// health route
+app.route("/health").get((req, res) => {
   return res
     .status(200)
     .json({ success: true, message: "ToDo API is working" });

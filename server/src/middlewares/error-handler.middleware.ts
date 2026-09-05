@@ -5,7 +5,7 @@ const handleError: ErrorRequestHandler = (error, req, res, next) => {
   if (error instanceof AppError) {
     return res
       .status(error.statusCode)
-      .json({ success: false, massage: error.message });
+      .json({ success: false, message: error.message });
   }
 
   return res

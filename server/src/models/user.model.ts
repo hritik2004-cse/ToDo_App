@@ -25,8 +25,6 @@ const userSchema = new mongoose.Schema<IUser>(
     password: {
       type: String,
       required: true,
-      minlength: 8,
-      maxlength: 40,
       select: false,
     },
     isVerified: {
@@ -59,8 +57,8 @@ const userSchema = new mongoose.Schema<IUser>(
         },
         taskType: {
           type: String,
-          enum: ["daily", "urgent", "completed"],
-          default: "daily",
+          enum: ["pending", "completed"],
+          default: "pending",
         },
         isCompleted: {
           type: Boolean,
@@ -68,6 +66,10 @@ const userSchema = new mongoose.Schema<IUser>(
         },
       },
     ],
+    refreshToken: {
+      type: String,
+      default: "",
+    },
     resetToken: {
       type: String,
       default: "",
@@ -81,7 +83,7 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 userSchema.pre("save", async function () {
-  if (this.isModified("password") || !this.password) return;
+  if (!this.isModified("password") || !this.password) return;
   this.password = await bcrypt.hash(this.password, env.saltRounds);
 });
 
