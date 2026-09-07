@@ -1,21 +1,59 @@
 "use client";
 
 import React from "react";
+import { isAxiosError } from "axios";
+import { toast } from "react-toastify";
+import api from "@/config/axios.config";
 import { LuInbox } from "react-icons/lu";
+import { Task } from "@/types/task.types";
 import NavBar from "@/components/main/NavBar";
 import { IoMdAddCircle } from "react-icons/io";
+import { LuLoaderCircle } from "react-icons/lu";
 import Button from "@/components/utility/Button";
 import TaskInput from "@/components/main/TaskInput";
 import TaskModel from "@/components/main/TaskModel";
 
 export default function Home() {
-  const [tasks, setTasks] = React.useState([]);
+  const [tasks, setTasks] = React.useState<Task[]>([]);
+  const [filter, setFilter] = React.useState<"all" | "pending" | "completed">(
+    "all",
+  );
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const filterTasks =
+    filter === "all" ? tasks : tasks.filter((task) => task.status === filter);
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/task/all");
+      setTasks(response?.data?.tasks);
+    } catch (error) {
+      const errorMsg = isAxiosError(error)
+        ? error?.response?.data?.message
+        : "Unable to get tasks";
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // on every mount the update tasks will be called to get all tasks from api
+  React.useEffect(() => {
+    fetchTasks();
+  }, []);
 
   return (
     <div className="w-full h-screen page">
       <NavBar />
       <main className="main">
-        {tasks.length <= 0 ? (
+        {loading ? (
+          <main className="w-full h-screen page">
+            <NavBar />
+            <section className="w-full h-full flex items-center justify-center main">
+              <LuLoaderCircle className="text-3xl text-accent animate-spin" />
+            </section>
+          </main>
+        ) : tasks.length <= 0 ? (
           <section className="h-full w-full flex items-center justify-center ">
             <div className="w-[95%] mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
               <LuInbox className="text-5xl lg:text-7xl xl:text-6xl text-foreground" />
@@ -35,21 +73,35 @@ export default function Home() {
         ) : (
           <section className="w-full mt-8 flex items-center justify-center">
             <div className="w-[95%] md:w-[90%] lg:w-[80%] xl:w-[75%] h-full flex flex-col">
-              <ul className="w-full flex items-center justify-start gap-3 md:gap-4 mb-3 md:mb-4">
-                <li className="py-2 md:py-3 px-3 md:px-5 bg-gray border-2 border-foreground capitalize text-xs md:text-base font-medium">
+              <div className="w-full flex items-center justify-start gap-3 md:gap-4 mb-3 md:mb-4">
+                <button
+                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "all" ? "bg-gray border-2 border-foreground" : ""}`}
+                  onClick={() => setFilter("all")}
+                >
                   all todos
-                </li>
-                <li className="py-2 md:py-3 px-3 md:px-5 bg-gray border-2 border-foreground capitalize text-xs md:text-base font-medium">
+                </button>
+                <button
+                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "pending" ? "bg-gray border-2 border-foreground" : ""}`}
+                  onClick={() => setFilter("pending")}
+                >
                   pending
-                </li>
-                <li className="py-2 md:py-3 px-3 md:px-5 bg-gray border-2 border-foreground capitalize text-xs md:text-base font-medium">
+                </button>
+                <button
+                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "completed" ? "bg-gray border-2 border-foreground" : ""}`}
+                  onClick={() => setFilter("completed")}
+                >
                   completed
-                </li>
-              </ul>
+                </button>
+              </div>
               <TaskInput />
-              {/* {tasks.map((task, index) => (
-                <TaskModel id="" key={index} name="" updatedAt={}/>
-              ))} */}
+              {filterTasks.map((task) => (
+                <TaskModel
+                  id={task.id}
+                  key={task.id}
+                  name={task.task}
+                  updatedAt={task.updatedAt}
+                />
+              ))}
             </div>
           </section>
         )}

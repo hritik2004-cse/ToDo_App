@@ -19,5 +19,3 @@ export const logoutService = async (userId: string) => {
   user.refreshToken = "";
   await user.save();
 };
-
-export const refreshAccessTokenService = async (userId: string) => {};

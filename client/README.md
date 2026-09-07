@@ -37,7 +37,7 @@ client/
 │   │   │   └── page.tsx
 │   │   ├── register/        # Register page
 │   │   │   └── page.tsx
-│   │   ├── verify-account/  # Email OTP verification page
+│   │   ├── verify-account/  # Email OTP verification page (post-register)
 │   │   │   └── page.tsx
 │   │   ├── favicon.ico
 │   │   ├── icon0.svg
@@ -56,9 +56,10 @@ client/
 │   │       └── Logo.tsx
 │   ├── config/
 │   │   ├── axios.config.ts  # Axios instance with base URL & credentials
-│   │   └── env.config.ts    # Validated environment variables
+│   │   └── env.config.ts    # Validated environment variables (throws if missing)
 │   ├── types/               # Shared TypeScript types
-│   │   └── register.types.ts
+│   │   ├── login.types.ts   # LoginFormData type
+│   │   └── register.types.ts# RegisterFormData type
 │   └── lib/
 │       └── utils.ts         # cn() helper (clsx + tailwind-merge)
 ├── .env                     # Environment variables (gitignored)
@@ -72,12 +73,12 @@ client/
 
 ## 🌐 Pages
 
-| Route              | Page                         | Description                                      |
-|--------------------|------------------------------|--------------------------------------------------|
-| `/`                | `page.tsx`                   | Task list — view, add, complete & delete tasks   |
-| `/login`           | `login/page.tsx`             | User login                                       |
-| `/register`        | `register/page.tsx`          | User registration                                |
-| `/verify-account`  | `verify-account/page.tsx`    | Email OTP verification after registration        |
+| Route             | Page                       | Description                                     |
+|-------------------|----------------------------|-------------------------------------------------|
+| `/`               | `page.tsx`                 | Task list — view, add, update & delete tasks    |
+| `/login`          | `login/page.tsx`           | User login with email & password                |
+| `/register`       | `register/page.tsx`        | User registration                               |
+| `/verify-account` | `verify-account/page.tsx`  | Enter OTP sent to email to activate account     |
 
 ---
 
@@ -86,7 +87,7 @@ client/
 - **Dark theme** with CSS custom properties defined in `globals.css`
 - **Color tokens:** `background`, `foreground`, `accent`, `secondary-accent`, `gray`, `placeholder`, `edit`, `delete`
 - **Typography:** Inter (primary), Geist Sans, Geist Mono via `next/font`
-- **Styling:** Tailwind CSS v4 with arbitrary values and custom tokens
+- **Styling:** Tailwind CSS v4 with custom tokens and arbitrary values
 
 ---
 
@@ -112,7 +113,7 @@ Create a `.env` file:
 NEXT_PUBLIC_SERVER_URL=http://localhost:5000
 ```
 
-> `NEXT_PUBLIC_SERVER_URL` is validated at startup — the app will throw if it's missing.
+> `NEXT_PUBLIC_SERVER_URL` is validated at startup — the app throws if it's missing.
 
 ### 3. Run development server
 
@@ -134,18 +135,17 @@ pnpm lint     # Run ESLint
 
 ## 🔗 API Communication
 
-All API calls go through the configured Axios instance at `src/config/axios.config.ts`:
+All API calls go through the Axios instance at `src/config/axios.config.ts`:
 
-- Base URL from `NEXT_PUBLIC_SERVER_URL`
-- `withCredentials: true` for cookie-based auth
-- Base path: `/api/v1`
+- Base URL: `NEXT_PUBLIC_SERVER_URL/api/v1`
+- `withCredentials: true` — sends HTTP-only cookies on every request
 
 ---
 
 ## 🔐 Auth Flow
 
-1. **Register** → server sends a verification OTP to the user's email
-2. **Verify Account** (`/verify-account`) → user enters OTP to activate account
-3. **Login** → sets an HTTP-only auth cookie
-4. **Forgot Password** → server emails a reset OTP
-5. **Reset Password** → user submits new password with OTP
+1. **Register** (`/register`) → server sends a verification OTP to the user's email; email is saved to `sessionStorage`
+2. **Verify Account** (`/verify-account`) → user enters OTP to activate account → redirected to `/login`
+3. **Login** (`/login`) → server sets `accessToken` + `refreshToken` HTTP-only cookies → redirected to `/`
+4. **Forgot Password** → user requests a reset OTP via email
+5. **Reset Password** → user submits new password + OTP

@@ -1,5 +1,10 @@
-export interface TaskItems {
+import mongoose from "mongoose";
+
+export default interface TaskItems {
+  userId: mongoose.Types.ObjectId;
   task: string;
   isCompleted: boolean;
-  taskType: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: "pending" | "completed";
 }

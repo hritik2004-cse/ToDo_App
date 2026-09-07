@@ -1,23 +1,27 @@
 import type { Request, Response } from "express";
 import cookieOptions from "../config/cookie.config.js";
-import { loginService } from "../service/auth/login.service.js";
+import { AppError } from "../utils/app-error.utils.js";
 import { registerService } from "../service/auth/register.service.js";
-import {
-  forgetPasswordService,
-  resetPasswordService,
-} from "../service/auth/password.service.js";
 import {
   accessTokenExpiry,
   refreshTokenExpiry,
 } from "../constants/auth.constants.js";
 import {
-  verifyEmailService,
-  resendEmailVerificationService,
-} from "../service/auth/verify-email.service.js";
-import {
   DeleteAccountService,
   logoutService,
 } from "../service/auth/account.service.js";
+import {
+  loginService,
+  refreshAccessTokenService,
+} from "../service/auth/login.service.js";
+import {
+  forgetPasswordService,
+  resetPasswordService,
+} from "../service/auth/password.service.js";
+import {
+  verifyEmailService,
+  resendEmailVerificationService,
+} from "../service/auth/verify-email.service.js";
 
 // register controller
 export const register = async (req: Request, res: Response) => {
@@ -64,6 +68,31 @@ export const login = async (req: Request, res: Response) => {
     message: "Account login successfull",
     data: result?.user,
   });
+};
+
+// refresh access token controller
+export const refreshAccessToken = async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    throw new AppError(401, "Refresh token is required");
+  }
+
+  const data = await refreshAccessTokenService(refreshToken);
+
+  res
+    .cookie("accessToken", data.accessToken, {
+      ...cookieOptions,
+      maxAge: accessTokenExpiry,
+    })
+    .cookie("refreshToken", data.refreshToken, {
+      ...cookieOptions,
+      maxAge: refreshTokenExpiry,
+    });
+
+  res
+    .status(200)
+    .json({ success: true, message: "Access token refreshed successfully" });
 };
 
 // forget password controller

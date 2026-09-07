@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import env from "../config/env.config.js";
-import type { IUser } from "../types/user.types.js";
+import type IUser from "../types/user.types.js";
 
 const userSchema = new mongoose.Schema<IUser>(
   {
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     otpExpiry: {
       type: Date,
-      dafault: null,
+      default: null,
     },
     profileImg: {
       publicId: {
@@ -49,23 +49,6 @@ const userSchema = new mongoose.Schema<IUser>(
         default: "",
       },
     },
-    tasks: [
-      {
-        task: {
-          type: String,
-          default: "",
-        },
-        taskType: {
-          type: String,
-          enum: ["pending", "completed"],
-          default: "pending",
-        },
-        isCompleted: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
     refreshToken: {
       type: String,
       default: "",
