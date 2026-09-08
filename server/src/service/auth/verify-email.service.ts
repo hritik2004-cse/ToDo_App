@@ -5,6 +5,7 @@ import { generateOTP, hashOTP } from "../../utils/otp.utils.js";
 import type { VerifyEmailDTO } from "../../dto/auth/verify-email.dto.js";
 import type { ResendVerifyEmailDTO } from "../../dto/auth/resend-verify-email.dto.js";
 import sendEmail from "../../config/emailjs.config.js";
+import { maskEmail } from "../../utils/mask-email.utils.js";
 
 export const verifyEmailService = async (data: VerifyEmailDTO) => {
   const { otp } = data;
@@ -57,4 +58,8 @@ export const resendEmailVerificationService = async (
       expiry: userExpiry,
     },
   });
+
+  return {
+    maskedEmail: maskEmail(user.email),
+  };
 };

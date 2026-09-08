@@ -99,6 +99,7 @@ export default function Home() {
                   id={task.id}
                   key={task.id}
                   name={task.task}
+                  isCompleted={task.isCompleted}
                   updatedAt={task.updatedAt}
                 />
               ))}

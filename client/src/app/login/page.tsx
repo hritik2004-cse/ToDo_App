@@ -98,6 +98,9 @@ const loginPage = () => {
             {showPassword ? <LuEyeClosed /> : <LuEye />}
           </button>
         </div>
+        <Link href="/forget-password" className="w-full flex items-center justify-end text-accent hover:underline hover:text-accent/70 text-base active:scale-95">
+          forget password?
+        </Link>
         <Button
           varient="primary"
           type="submit"

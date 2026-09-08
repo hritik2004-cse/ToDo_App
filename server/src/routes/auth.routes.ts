@@ -15,6 +15,7 @@ import {
   resetPassword,
   deleteAccount,
   forgetPassword,
+  resendForgetPassword,
   resendEmailVerification,
 } from "../controllers/auth.controller.js";
 
@@ -36,6 +37,9 @@ authRouter
 authRouter
   .route("/forget-password")
   .post(validate(forgetPasswordSchema), forgetPassword);
+authRouter
+  .route("/resend-forget-password")
+  .post(validate(forgetPasswordSchema), resendForgetPassword);
 authRouter
   .route("/resend-verify-email")
   .post(validate(resendVerifyEmailSchema), resendEmailVerification);

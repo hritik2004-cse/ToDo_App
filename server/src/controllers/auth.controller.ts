@@ -16,6 +16,7 @@ import {
 } from "../service/auth/login.service.js";
 import {
   forgetPasswordService,
+  resendForgetPasswordService,
   resetPasswordService,
 } from "../service/auth/password.service.js";
 import {
@@ -101,6 +102,14 @@ export const forgetPassword = async (req: Request, res: Response) => {
   return res
     .status(200)
     .json({ success: true, message: "Forget password link sent" });
+};
+
+export const resendForgetPassword = async (req: Request, res: Response) => {
+  await resendForgetPasswordService(req.body);
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Link sent successfully" });
 };
 
 // reset password controller
