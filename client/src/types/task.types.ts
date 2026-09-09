@@ -3,12 +3,13 @@ export type Task = {
   task: string;
   status: "pending" | "completed";
   isCompleted: boolean;
-  updatedAt: Date;
+  updatedAt: string;
 };
 
 export type TaskModelProps = {
   id: string;
   name: string;
-  updatedAt: Date;
+  updatedAt: string;
   isCompleted: boolean;
+  fetchTasks: () => Promise<void>
 };

@@ -12,7 +12,6 @@ export const getCurrentUserService = async(userId:string) => {
         firstname:user.firstName,
         lastName:user.lastName,
         email:user.email,
-        tasks: user.tasks,
         profileImgUrl: user.profileImg?.url,
     }
 }

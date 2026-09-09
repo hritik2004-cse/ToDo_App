@@ -1,6 +1,7 @@
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
+import { AuthProvider } from "@/context/AuthContext";
 import { ToastContainer, Slide } from "react-toastify";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className="min-h-full flex flex-col bg-background"
         suppressHydrationWarning
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <ToastContainer
           position="top-right"
           autoClose={3000}

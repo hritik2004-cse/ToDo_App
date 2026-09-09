@@ -26,7 +26,7 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
 
   const userId = user._id.toString();
   const newAccessToken = generateAccessToken(userId);
-  const newRefreshToken = generateAccessToken(userId);
+  const newRefreshToken = generateRefreshToken(userId);
   const hashedRefreshToken = await bcrypt.hash(newRefreshToken, env.saltRounds);
 
   const updatedUser = await User.findOneAndUpdate(

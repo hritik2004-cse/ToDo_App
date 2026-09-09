@@ -106,7 +106,7 @@ const loginPage = () => {
           type="submit"
           className={`${loading ? "bg-accent/30 animate-fade border-accent/30 text-foreground" : ""}`}
         >
-          {loading ? "creating..." : "login"}
+          {loading ? "logging you in..." : "login"}
         </Button>
         <span className="flex items-center justify-center gap-1 text-sm lg:text-base">
           <p className="">Not have an account?</p>

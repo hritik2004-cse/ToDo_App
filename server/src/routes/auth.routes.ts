@@ -15,6 +15,7 @@ import {
   resetPassword,
   deleteAccount,
   forgetPassword,
+  refreshAccessToken,
   resendForgetPassword,
   resendEmailVerification,
 } from "../controllers/auth.controller.js";
@@ -23,6 +24,7 @@ const authRouter: Router = Router();
 
 // with authMiddle
 authRouter.route("/logout").post(authMiddle, logout);
+authRouter.route("/refresh").post(refreshAccessToken);
 authRouter.route("/delete-account").delete(authMiddle, deleteAccount);
 
 // with validate middleware

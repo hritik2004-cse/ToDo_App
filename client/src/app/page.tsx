@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import api from "@/config/axios.config";
 import { LuInbox } from "react-icons/lu";
 import { Task } from "@/types/task.types";
+import useAuth from "@/context/AuthContext";
 import NavBar from "@/components/main/NavBar";
 import { IoMdAddCircle } from "react-icons/io";
 import { LuLoaderCircle } from "react-icons/lu";
@@ -14,7 +15,9 @@ import TaskInput from "@/components/main/TaskInput";
 import TaskModel from "@/components/main/TaskModel";
 
 export default function Home() {
+  const { fetchCurrentUser } = useAuth();
   const [tasks, setTasks] = React.useState<Task[]>([]);
+  const [addTask, setAddTask] = React.useState<boolean>(false);
   const [filter, setFilter] = React.useState<"all" | "pending" | "completed">(
     "all",
   );
@@ -26,6 +29,7 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await api.get("/task/all");
+      fetchCurrentUser();
       setTasks(response?.data?.tasks);
     } catch (error) {
       const errorMsg = isAxiosError(error)
@@ -48,26 +52,37 @@ export default function Home() {
       <main className="main">
         {loading ? (
           <main className="w-full h-screen page">
-            <NavBar />
             <section className="w-full h-full flex items-center justify-center main">
               <LuLoaderCircle className="text-3xl text-accent animate-spin" />
             </section>
           </main>
         ) : tasks.length <= 0 ? (
-          <section className="h-full w-full flex items-center justify-center ">
+          <section className="h-full w-full flex items-center justify-center">
             <div className="w-[95%] mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
-              <LuInbox className="text-5xl lg:text-7xl xl:text-6xl text-foreground" />
-              <h2 className="text-foreground text-2xl lg:text-3xl xl:text-2xl font-bold">
-                No todos found?
-              </h2>
-              <p className="text-lg lg:text-xl xl:text-lg text-center text-foreground/70 leading-5">
-                No todo has been added till now. Click the below button to
-                create a new task.
-              </p>
-              <Button varient="new" className="gap-2">
-                <IoMdAddCircle className="text-2xl lg:text-3xl xl:text-2xl" />{" "}
-                Create a new task
-              </Button>
+              {addTask ? (
+                <div className="w-[95%] mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
+                  <TaskInput />
+                </div>
+              ) : (
+                <div className="w-full mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
+                  <LuInbox className="text-5xl lg:text-7xl xl:text-6xl text-foreground" />
+                  <h2 className="text-foreground text-2xl lg:text-3xl xl:text-2xl font-bold">
+                    No todos found?
+                  </h2>
+                  <p className="text-lg lg:text-xl xl:text-lg text-center text-foreground/70 leading-5">
+                    No todo has been added till now. Click the below button to
+                    create a new task.
+                  </p>
+                  <Button
+                    varient="new"
+                    className="gap-2"
+                    onClick={() => setAddTask(true)}
+                  >
+                    <IoMdAddCircle className="text-2xl lg:text-3xl xl:text-2xl" />{" "}
+                    Create a new task
+                  </Button>
+                </div>
+              )}
             </div>
           </section>
         ) : (
@@ -99,8 +114,9 @@ export default function Home() {
                   id={task.id}
                   key={task.id}
                   name={task.task}
-                  isCompleted={task.isCompleted}
+                  fetchTasks={fetchTasks}
                   updatedAt={task.updatedAt}
+                  isCompleted={task.isCompleted}
                 />
               ))}
             </div>

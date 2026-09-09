@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 import api from "@/config/axios.config";
@@ -26,12 +26,22 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 
-const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
+const TaskModel = ({
+  id,
+  name,
+  updatedAt,
+  fetchTasks,
+  isCompleted,
+}: TaskModelProps) => {
+  const [check, setCheck] = useState<boolean>(false);
+  
+
   // handle task delete
   const handleDelete = async () => {
     try {
       const response = await api.delete(`/task/delete/${id}`);
       toast.success(response?.data?.message);
+      fetchTasks();
     } catch (error) {
       const errorMsg = isAxiosError(error)
         ? error?.response?.data?.message
@@ -47,8 +57,9 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
   const handleStatus = async () => {
     try {
       await api.patch(`/task/update/status/${id}`);
+      fetchTasks();
     } catch (error) {
-
+      toast.error("Unable to update task");
     }
   };
 
@@ -58,10 +69,16 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
       id={id}
     >
       <div className="flex items-center justify-start gap-2">
+        <label
+          htmlFor={`taskStatus-${id}`}
+          className="sr-only"
+        >
+          Mark "{name}" as completed
+        </label>
         <input
           type="checkbox"
           name="taskStatus"
-          id="taskStatus"
+          id={`taskStatus-${id}`}
           checked={isCompleted}
           disabled={isCompleted}
           onChange={handleStatus}
@@ -77,8 +94,8 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <button className="md:hidden">
-              <IoEllipsisVerticalSharp className="text-lg" />
+            <button className="md:hidden" aria-label={`More options for ${name}`}>
+              <IoEllipsisVerticalSharp className="text-lg" aria-hidden="true" />
             </button>
           }
         />
@@ -94,7 +111,7 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
       </DropdownMenu>
       <div className="hidden md:flex items-center justify-end gap-2">
         <p className="border py-1 px-2 border-foreground text-base text-foreground font-medium">
-          {updatedAt.toLocaleDateString("en-IN", {
+          {new Date(updatedAt).toLocaleDateString("en-IN", {
             year: "2-digit",
             month: "short",
             day: "2-digit",
@@ -103,8 +120,11 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
         <AlertDialog>
           <AlertDialogTrigger
             render={
-              <button className="bg-delete p-1 cursor-pointer hover:bg-delete/70 transition-all duration-300">
-                <MdOutlineDeleteOutline className="text-xl md:text-2xl text-background" />
+              <button
+                className="bg-delete p-1 cursor-pointer hover:bg-delete/70 transition-all duration-300"
+                aria-label={`Delete task: ${name}`}
+              >
+                <MdOutlineDeleteOutline className="text-xl md:text-2xl text-background" aria-hidden="true" />
               </button>
             }
           />
@@ -126,8 +146,11 @@ const TaskModel = ({ id, name, updatedAt, isCompleted }: TaskModelProps) => {
           </AlertDialogContent>
         </AlertDialog>
 
-        <button className="bg-edit p-1 cursor-pointer hover:bg-edit/70 transition-all duration-300">
-          <TiPencil className="text-xl md:text-2xl text-background" />
+        <button
+          className="bg-edit p-1 cursor-pointer hover:bg-edit/70 transition-all duration-300"
+          aria-label={`Edit task: ${name}`}
+        >
+          <TiPencil className="text-xl md:text-2xl text-background" aria-hidden="true" />
         </button>
       </div>
     </article>
