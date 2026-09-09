@@ -7,15 +7,18 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 ## ✨ Features
 
 - 🔐 User authentication (Register / Login / Logout) with JWT access & refresh tokens stored in HTTP-only cookies
-- 📧 Email verification via OTP (EmailJS) after registration
+- 🔄 Silent token refresh via Axios interceptor — concurrent 401s are queued and replayed after a single refresh call
+- 📧 Email verification via OTP after registration
 - 🔑 Forgot password & reset password flow via OTP
 - 🗑️ Delete account
-- ✅ Create, read, update, and delete tasks
-- 📌 Task status tracking (daily / urgent / completed)
-- 🌙 Dark-themed, responsive UI
-- 🔒 Password hashing with bcrypt
+- ✅ Create, view, complete, and delete tasks
+- 📌 Task status tracking (pending / completed)
+- 🌙 Dark-themed, responsive UI with accessibility support (ARIA labels, sr-only labels, unique IDs)
+- 🔒 Password & refresh token hashing with bcrypt
+- 🔁 Refresh token rotation with optimistic locking (prevents token reuse attacks)
 - ✅ Input validation with Zod (server) and TypeScript (client)
-- 🌐 Environment-aware cookie security (secure + sameSite in production)
+- 🌐 Environment-aware cookie security (`secure` + `sameSite` in production)
+- 🧹 Console logs automatically stripped in production builds (Next.js SWC compiler)
 
 ---
 
@@ -86,46 +89,48 @@ cd client && pnpm dev
 Base URL: `/api/v1`
 
 ### Auth
-| Route                              | Description                       |
-|------------------------------------|-----------------------------------|
-| `POST /auth/register`              | Register & trigger email OTP      |
-| `POST /auth/login`                 | Login — sets access + refresh cookies |
-| `POST /auth/logout`                | Logout — clears cookies           |
-| `POST /auth/verify-email`          | Verify email with OTP             |
-| `POST /auth/resend-verify-email`   | Resend verification OTP           |
-| `POST /auth/forget-password`       | Request password reset OTP        |
-| `POST /auth/reset-password`        | Reset password with OTP           |
-| `DELETE /auth/delete-account`      | Delete authenticated user account |
+| Method   | Route                            | Auth | Description                          |
+|----------|----------------------------------|------|--------------------------------------|
+| `POST`   | `/auth/register`                 | ❌   | Register & trigger email OTP         |
+| `POST`   | `/auth/login`                    | ❌   | Login — sets access + refresh cookies|
+| `POST`   | `/auth/logout`                   | ✅   | Logout — clears cookies              |
+| `POST`   | `/auth/refresh`                  | ❌   | Issue new access + refresh tokens    |
+| `POST`   | `/auth/verify-email`             | ❌   | Verify email with OTP                |
+| `POST`   | `/auth/resend-verify-email`      | ❌   | Resend verification OTP              |
+| `POST`   | `/auth/forget-password`          | ❌   | Request password reset OTP           |
+| `POST`   | `/auth/resend-forget-password`   | ❌   | Resend password reset OTP            |
+| `POST`   | `/auth/reset-password`           | ❌   | Reset password with OTP              |
+| `DELETE` | `/auth/delete-account`           | ✅   | Delete authenticated user account    |
 
 ### Tasks
-| Route                   | Description       |
-|-------------------------|-------------------|
-| `POST /task/add`        | Create a task     |
-| `PATCH /task/update/:id`| Update a task     |
-| `DELETE /task/delete/:id`| Delete a task    |
+| Method   | Route                        | Auth | Description               |
+|----------|------------------------------|------|---------------------------|
+| `GET`    | `/task/all`                  | ✅   | Get all tasks for user    |
+| `POST`   | `/task/add`                  | ✅   | Create a task             |
+| `PATCH`  | `/task/update/:id`           | ✅   | Update task name          |
+| `PATCH`  | `/task/update/status/:id`    | ✅   | Toggle task status        |
+| `DELETE` | `/task/delete/:id`           | ✅   | Delete a task             |
 
 ### User
-| Route                          | Description              |
-|--------------------------------|--------------------------|
-| `GET /user`                    | Get current user profile |
-| `POST /user/update-profile`    | Update name/details      |
-| `POST /user/update-password`   | Change password          |
-| `POST /user/update-profile-img`| Update profile image     |
+| Method | Route       | Auth | Description              |
+|--------|-------------|------|--------------------------|
+| `GET`  | `/user/me`  | ✅   | Get current user profile |
 
 ---
 
 ## 📦 Tech Stack
 
-| Layer           | Technology                                        |
-|-----------------|---------------------------------------------------|
-| Frontend        | Next.js 16, React 19, TypeScript                  |
-| Styling         | Tailwind CSS v4, shadcn/ui                        |
-| Backend         | Express.js v5, TypeScript                         |
-| Database        | MongoDB + Mongoose                                |
-| Auth            | JWT (access + refresh tokens), bcrypt, HTTP-only cookies |
-| Email / OTP     | EmailJS                                           |
-| Validation      | Zod (server), TypeScript (client)                 |
-| Package Manager | pnpm v11 (workspaces)                             |
+| Layer           | Technology                                              |
+|-----------------|---------------------------------------------------------|
+| Frontend        | Next.js 16, React 19, TypeScript                        |
+| Styling         | Tailwind CSS v4, Base UI, shadcn/ui                     |
+| HTTP Client     | Axios with request interceptor (silent token refresh)   |
+| Backend         | Express.js v5, TypeScript                               |
+| Database        | MongoDB + Mongoose                                      |
+| Auth            | JWT (access + refresh rotation), bcrypt, HTTP-only cookies |
+| Email / OTP     | EmailJS                                                 |
+| Validation      | Zod (server), TypeScript (client)                       |
+| Package Manager | pnpm v11 (workspaces)                                   |
 
 ---
 

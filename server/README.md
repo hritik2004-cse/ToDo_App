@@ -33,8 +33,7 @@ server/
 │   │   ├── db.config.ts             # MongoDB connection (Mongoose)
 │   │   ├── env.config.ts            # Validated & exported environment variables
 │   │   ├── cookie.config.ts         # Shared CookieOptions (httpOnly, secure, sameSite)
-│   │   ├── emailjs.config.ts        # sendEmail() helper via EmailJS REST API
-│   │   └── cloudinary.config.ts     # Cloudinary setup (profile image uploads)
+│   │   └── emailjs.config.ts        # sendEmail() helper via EmailJS REST API
 │   ├── constants/
 │   │   └── auth.constants.ts        # Token maxAge values (accessTokenExpiry, refreshTokenExpiry)
 │   ├── routes/
@@ -46,34 +45,32 @@ server/
 │   │   ├── task.controller.ts       # Task route handlers
 │   │   └── user.controller.ts       # User route handlers
 │   ├── service/
-│   │   ├── auth/
-│   │   │   ├── register.service.ts       # Registration + OTP email
-│   │   │   ├── login.service.ts          # Login + JWT issuance + refresh token hashing
-│   │   │   ├── account.service.ts        # Logout, delete account, refresh token
-│   │   │   ├── verify-email.service.ts   # OTP verification
-│   │   │   └── password.service.ts       # Forget & reset password
-│   │   └── user/
-│   │       └── user.service.ts           # getCurrentUser, profile updates
-│   ├── models/
-│   │   └── user.model.ts            # Mongoose User schema (pre-save hook for bcrypt)
-│   ├── dto/
 │   │   └── auth/
-│   │       ├── login.dto.ts
-│   │       ├── register.dto.ts
-│   │       ├── verify-email.dto.ts
-│   │       ├── resend-verify-email.dto.ts
-│   │       ├── forget-password.dto.ts
-│   │       └── reset-password.dto.ts
+│   │       ├── register.service.ts       # Registration + OTP email
+│   │       ├── login.service.ts          # Login + JWT issuance + refresh token rotation
+│   │       ├── account.service.ts        # Logout, delete account
+│   │       ├── verify-email.service.ts   # OTP verification
+│   │       └── password.service.ts       # Forget & reset password
+│   ├── models/
+│   │   └── user.model.ts            # Mongoose User schema
+│   ├── dto/
+│   │   ├── auth/
+│   │   │   ├── login.dto.ts
+│   │   │   ├── register.dto.ts
+│   │   │   ├── verify-email.dto.ts
+│   │   │   ├── resend-verify-email.dto.ts
+│   │   │   ├── forget-password.dto.ts
+│   │   │   └── reset-password.dto.ts
+│   │   └── tasks/
+│   │       └── add-task.dto.ts
 │   ├── middlewares/
-│   │   ├── auth.middleware.ts            # JWT access token guard (sets req.userId)
+│   │   ├── auth.middleware.ts            # JWT access token guard (sets req.userId), passes errors to next()
 │   │   ├── validate-data.middleware.ts   # Zod request body validation
-│   │   └── error-handler.middleware.ts   # Global error handler (AppError + 500)
+│   │   └── error-handler.middleware.ts   # Global error handler (AppError → status code, 500 fallback)
 │   ├── types/
 │   │   ├── express.types.ts         # Extends Express Request with userId: string
 │   │   ├── jwt.types.ts             # TokenPayload interface { sub: string }
-│   │   ├── user.types.ts            # IUser interface for Mongoose
-│   │   ├── task.types.ts            # Task-related types
-│   │   └── email-js.types.ts        # SendEmailOptions type
+│   │   └── user.types.ts            # IUser interface for Mongoose
 │   └── utils/
 │       ├── app-error.utils.ts       # AppError class (statusCode + message)
 │       ├── jwt.utils.ts             # generateAccessToken, generateRefreshToken, verify*
@@ -93,50 +90,70 @@ Base URL: `http://localhost:{PORT}/api/v1`
 
 ### Health Check
 
-| Method | Endpoint  | Description       |
-|--------|-----------|-------------------|
-| `GET`  | `/health` | API liveness check|
+| Method | Endpoint  | Description        |
+|--------|-----------|--------------------|
+| `GET`  | `/health` | API liveness check |
 
 ### Auth — `/api/v1/auth`
 
-| Method   | Endpoint                 | Description                              | Auth Required |
-|----------|--------------------------|------------------------------------------|---------------|
-| `POST`   | `/register`              | Register user & send verification OTP   | ❌            |
-| `POST`   | `/login`                 | Login → sets access + refresh cookies   | ❌            |
-| `POST`   | `/logout`                | Clear auth cookies                       | ✅            |
-| `POST`   | `/verify-email`          | Verify email with OTP                   | ❌            |
-| `POST`   | `/resend-verify-email`   | Resend verification OTP                 | ❌            |
-| `POST`   | `/forget-password`       | Send password reset OTP to email        | ❌            |
-| `POST`   | `/reset-password`        | Reset password using OTP                | ❌            |
-| `DELETE` | `/delete-account`        | Permanently delete account              | ✅            |
+| Method   | Endpoint                   | Auth | Description                             |
+|----------|----------------------------|------|-----------------------------------------|
+| `POST`   | `/register`                | ❌   | Register user & send verification OTP   |
+| `POST`   | `/login`                   | ❌   | Login → sets access + refresh cookies   |
+| `POST`   | `/logout`                  | ✅   | Clear auth cookies                      |
+| `POST`   | `/refresh`                 | ❌   | Issue new access + refresh tokens       |
+| `POST`   | `/verify-email`            | ❌   | Verify email with OTP                   |
+| `POST`   | `/resend-verify-email`     | ❌   | Resend verification OTP                 |
+| `POST`   | `/forget-password`         | ❌   | Send password reset OTP to email        |
+| `POST`   | `/resend-forget-password`  | ❌   | Resend password reset OTP               |
+| `POST`   | `/reset-password`          | ❌   | Reset password using OTP                |
+| `DELETE` | `/delete-account`          | ✅   | Permanently delete account              |
 
 ### Tasks — `/api/v1/task`
 
-| Method   | Endpoint       | Description                      | Auth Required |
-|----------|----------------|----------------------------------|---------------|
-| `POST`   | `/add`         | Create a new task                | ✅            |
-| `PATCH`  | `/update/:id`  | Update a task (name / status)    | ✅            |
-| `DELETE` | `/delete/:id`  | Delete a task                    | ✅            |
+All task routes require authentication (`authMiddle` applied at the router level).
+
+| Method   | Endpoint             | Description                    |
+|----------|----------------------|--------------------------------|
+| `GET`    | `/all`               | Get all tasks for the user     |
+| `POST`   | `/add`               | Create a new task              |
+| `PATCH`  | `/update/:id`        | Update a task's name           |
+| `PATCH`  | `/update/status/:id` | Toggle task completed status   |
+| `DELETE` | `/delete/:id`        | Delete a task                  |
 
 ### User — `/api/v1/user`
 
-| Method | Endpoint               | Description                   | Auth Required |
-|--------|------------------------|-------------------------------|---------------|
-| `GET`  | `/`                    | Get logged-in user profile    | ✅            |
-| `POST` | `/update-profile`      | Update name/details           | ✅            |
-| `POST` | `/update-password`     | Change password               | ✅            |
-| `POST` | `/update-profile-img`  | Update profile image          | ✅            |
+| Method | Endpoint | Auth | Description                  |
+|--------|----------|------|------------------------------|
+| `GET`  | `/me`    | ✅   | Get logged-in user profile   |
 
 ---
 
 ## 🔐 Authentication
 
-- On **login**, the server issues two JWTs:
+### Token Strategy
+
+- On **login**, two JWTs are issued:
   - **Access token** (short-lived, e.g. `15m`) — stored in an HTTP-only cookie
   - **Refresh token** (long-lived, e.g. `7d`) — hashed with bcrypt and stored in MongoDB + sent as HTTP-only cookie
-- The `auth.middleware.ts` guard verifies the access token and attaches `req.userId`
-- Cookies are set with `httpOnly: true`, `secure: true` in production, and `sameSite: "none"` in production / `"lax"` in development
-- Passwords are hashed by a Mongoose `pre("save")` hook — **never stored in plaintext**
+- On **refresh** (`POST /auth/refresh`):
+  - Server verifies the refresh token cookie
+  - Issues a **new** access token and a **new** refresh token (rotation)
+  - Old refresh token hash is replaced atomically using `findOneAndUpdate` with the current hash as the filter — preventing replay attacks ("Refresh token already used" if the token was already rotated)
+- The `/auth/refresh` endpoint is **not** protected by `authMiddle` (by design — the access token is already expired)
+
+### `auth.middleware.ts`
+
+- Reads `accessToken` from cookies
+- Calls `verifyAccessToken()` — throws `AppError(401, ...)` on missing or expired token
+- Uses `try/catch` + `next(error)` to pass errors to the global error handler (synchronous Express middlewares must use `next(error)`, not `throw`)
+
+### Cookies
+
+| Cookie         | httpOnly | Secure (prod) | SameSite            |
+|----------------|----------|---------------|---------------------|
+| `accessToken`  | ✅       | ✅            | `none` / `lax` (dev)|
+| `refreshToken` | ✅       | ✅            | `none` / `lax` (dev)|
 
 ---
 
@@ -207,16 +224,18 @@ pnpm start    # Run compiled production build
 ## 🏗️ Architecture
 
 ```
-Request → Route → auth.middleware (guard) → validate.middleware (Zod) → Controller → Service → Model → MongoDB
-                                                                                          ↓
-                                                                                    EmailJS (OTP)
-                                                                                    jwt.utils (tokens)
+Request → Route → auth.middleware (guard) → validate.middleware (Zod) → Controller → Service → MongoDB
+                                                                                         ↓
+                                                                                   EmailJS (OTP)
+                                                                                   jwt.utils (tokens)
+                  ↓ errors
+            error-handler.middleware (AppError → HTTP response)
 ```
 
 - **Routes** attach middlewares and controllers to endpoints
-- **Middlewares** handle auth guarding (`auth.middleware`) and input validation (`validate-data.middleware`)
+- **Middlewares** handle auth guarding (`auth.middleware`) and input validation (`validate-data.middleware`); errors are always passed via `next(error)`
 - **Controllers** handle HTTP request/response, call services, set cookies
 - **Services** contain all business logic, decoupled from HTTP
-- **Models** define MongoDB schemas; password hashing happens in the `pre("save")` hook
+- **Models** define MongoDB schemas
 - **DTOs** are Zod schemas that validate and type-infer request bodies
 - **Utils** provide `AppError`, JWT helpers, and OTP utilities
