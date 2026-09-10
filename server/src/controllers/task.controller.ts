@@ -30,7 +30,7 @@ export const updateTaskStatus = async (
   req: Request<{ id: string }>,
   res: Response,
 ) => {
-  const data = updateTaskStatusService(req.userId, req.params.id);
+  const data = await updateTaskStatusService(req.userId, req.params.id);
   return res.status(200).json({
     success: true,
     message: "Updated task status successfully",

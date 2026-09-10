@@ -51,17 +51,15 @@ export default function Home() {
       <NavBar />
       <main className="main">
         {loading ? (
-          <main className="w-full h-screen page">
-            <section className="w-full h-full flex items-center justify-center main">
-              <LuLoaderCircle className="text-3xl text-accent animate-spin" />
-            </section>
-          </main>
+          <section className="w-full h-full flex items-center justify-center">
+            <LuLoaderCircle className="text-3xl text-accent animate-spin" />
+          </section>
         ) : tasks.length <= 0 ? (
           <section className="h-full w-full flex items-center justify-center">
             <div className="w-[95%] mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
               {addTask ? (
                 <div className="w-[95%] mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
-                  <TaskInput />
+                  <TaskInput fetchTasks={fetchTasks} />
                 </div>
               ) : (
                 <div className="w-full mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
@@ -108,7 +106,7 @@ export default function Home() {
                   completed
                 </button>
               </div>
-              <TaskInput />
+              <TaskInput fetchTasks={fetchTasks} />
               {filterTasks.map((task) => (
                 <TaskModel
                   id={task.id}

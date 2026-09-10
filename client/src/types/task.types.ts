@@ -11,5 +11,9 @@ export type TaskModelProps = {
   name: string;
   updatedAt: string;
   isCompleted: boolean;
-  fetchTasks: () => Promise<void>
+  fetchTasks: () => Promise<void>;
+};
+
+export type TaskInputProps = {
+  fetchTasks: () => Promise<void>;
 };

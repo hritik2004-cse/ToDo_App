@@ -4,7 +4,7 @@ import { AppError } from "../../utils/app-error.utils.js";
 
 // get all tasks service
 export const getAllTasksService = async (userId: string) => {
-  const tasks = await Task.find({ userId: userId });
+  const tasks = await Task.find({ userId: userId }).sort({ createdAt: -1 }); // this will always sort tasks in decending order
 
   return {
     tasks: tasks.map((task) => ({
@@ -49,6 +49,7 @@ export const updateTaskStatusService = async (userId: string, id: string) => {
     task: task.task,
     status: task.status,
     updatedAt: task.updatedAt,
+    isCompleted: task.isCompleted,
   };
 };
 
@@ -79,6 +80,6 @@ export const deleteTaskService = async (userId: string, id: string) => {
   const deletedTask = await Task.findOneAndDelete({ userId: userId, _id: id });
 
   if (!deletedTask) {
-    throw new AppError(404, "Account not found");
+    throw new AppError(404, "task not found");
   }
 };

@@ -5,6 +5,7 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import { RiMenu3Fill } from "react-icons/ri";
 import useAuth from "@/context/AuthContext";
 import Image from "next/image";
+import Link from "next/link";
 
 const NavBar = () => {
   const { user, userLoading } = useAuth();
@@ -19,7 +20,7 @@ const NavBar = () => {
         <Logo />
         {user ? (
           <div>
-            <figure className="">
+            <Link href="/profile" className="">
               <Image
                 src={user?.profileImgUrl || "/temp.jpg"}
                 height={100}
@@ -28,11 +29,13 @@ const NavBar = () => {
                 loading="eager"
                 className="w-12 h-12 object-cover border-2 border-foreground"
               />
-            </figure>
+            </Link>
           </div>
         ) : (
           <div className="">
-            <RiMenu3Fill className="inline-block md:hidden text-foreground text-3xl" />
+            <LinkButton href="/login" varient="primary" className="inline-block md:hidden">
+              login
+            </LinkButton>
             <div className="hidden md:flex items-center justify-center gap-5">
               <LinkButton href="/login" varient="primary">
                 login

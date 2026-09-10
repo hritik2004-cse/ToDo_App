@@ -33,8 +33,7 @@ const TaskModel = ({
   fetchTasks,
   isCompleted,
 }: TaskModelProps) => {
-  const [check, setCheck] = useState<boolean>(false);
-  
+  const [check, setCheck] = useState(isCompleted);
 
   // handle task delete
   const handleDelete = async () => {
@@ -55,10 +54,13 @@ const TaskModel = ({
 
   // handle task status
   const handleStatus = async () => {
+    setCheck(true)
     try {
       await api.patch(`/task/update/status/${id}`);
+      toast.success("Marked as completed")
       fetchTasks();
     } catch (error) {
+      setCheck(false)
       toast.error("Unable to update task");
     }
   };
@@ -69,24 +71,21 @@ const TaskModel = ({
       id={id}
     >
       <div className="flex items-center justify-start gap-2">
-        <label
-          htmlFor={`taskStatus-${id}`}
-          className="sr-only"
-        >
+        <label htmlFor={`taskStatus-${id}`} className="sr-only">
           Mark "{name}" as completed
         </label>
         <input
           type="checkbox"
           name="taskStatus"
-          id={`taskStatus-${id}`}
-          checked={isCompleted}
-          disabled={isCompleted}
+          id={id}
+          checked={check}
+          disabled={check}
           onChange={handleStatus}
           className="w-4 h-4 md:w-5 md:h-5 appearance-none border border-foreground bg-background checked:bg-accent cursor-pointer relative
             after:content-[''] after:absolute after:hidden checked:after:block after:left-1/2 after:top-[45%] after:-translate-x-1/2 after:-translate-y-1/2 after:w-1.5 after:h-3 after:border-r-[3px] after:border-b-[3px] after:border-background after:rotate-45"
         />
         <p
-          className={`text-sm md:text-base text-foreground font-medium truncate max-w-70 md:max-w-120 xl:max-w-none ${isCompleted ? "line-through text-foreground/70" : ""}`}
+          className={`text-sm md:text-base font-medium truncate max-w-70 md:max-w-120 xl:max-w-none ${check ? "line-through text-foreground/70" : "text-foreground"}`}
         >
           {name}
         </p>
@@ -94,7 +93,10 @@ const TaskModel = ({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <button className="md:hidden" aria-label={`More options for ${name}`}>
+            <button
+              className="md:hidden"
+              aria-label={`More options for ${name}`}
+            >
               <IoEllipsisVerticalSharp className="text-lg" aria-hidden="true" />
             </button>
           }
@@ -124,7 +126,10 @@ const TaskModel = ({
                 className="bg-delete p-1 cursor-pointer hover:bg-delete/70 transition-all duration-300"
                 aria-label={`Delete task: ${name}`}
               >
-                <MdOutlineDeleteOutline className="text-xl md:text-2xl text-background" aria-hidden="true" />
+                <MdOutlineDeleteOutline
+                  className="text-xl md:text-2xl text-background"
+                  aria-hidden="true"
+                />
               </button>
             }
           />
@@ -150,7 +155,10 @@ const TaskModel = ({
           className="bg-edit p-1 cursor-pointer hover:bg-edit/70 transition-all duration-300"
           aria-label={`Edit task: ${name}`}
         >
-          <TiPencil className="text-xl md:text-2xl text-background" aria-hidden="true" />
+          <TiPencil
+            className="text-xl md:text-2xl text-background"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </article>

@@ -3,17 +3,22 @@
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 import api from "@/config/axios.config";
-import React, { ChangeEvent } from "react";
 import { IoMdAddCircle } from "react-icons/io";
 import { LuLoaderCircle } from "react-icons/lu";
+import { TaskInputProps } from "@/types/task.types";
+import React, { ChangeEvent, SubmitEventHandler } from "react";
 
-const TaskInput = () => {
+const TaskInput = ({ fetchTasks }: TaskInputProps) => {
   const [loading, setLoading] = React.useState(false);
   const [task, setTask] = React.useState("");
-  const handleAdd = async () => {
+  const handleAdd: SubmitEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    if (!task.trim()) return;
     try {
       setLoading(true);
-      const response = await api.post("/task/add", { task });
+      const response = await api.post("/task/add", { task: task.trim() });
+      setTask("");
+      fetchTasks();
       toast.success(response?.data?.message);
     } catch (error) {
       const errMsg = isAxiosError(error)
@@ -30,30 +35,38 @@ const TaskInput = () => {
   };
 
   return (
-    <form className="flex items-center justify-between py-3 border-2 border-foreground h-auto relative w-full">
+    <form
+      className="flex items-center justify-between py-3 border-2 border-foreground h-auto relative w-full"
+      onSubmit={handleAdd}
+    >
       <label htmlFor="new-task-input" className="sr-only">
         New task
       </label>
       <input
+        required
         type="text"
         name="task"
-        id="new-task-input"
         value={task}
+        id="new-task-input"
         onChange={handleChange}
-        className="h-10 w-full pl-3 outline-none placeholder:text-placeholder text-foreground text-base font-medium"
         placeholder="Type to add a new todo..."
-        required
+        className="h-10 w-full pl-3 outline-none placeholder:text-placeholder text-foreground text-base font-medium"
       />
       <button
-        className="absolute right-0 bg-accent h-full w-15 md:w-16 lg:w-17 flex items-center justify-center"
-        onClick={handleAdd}
         type="submit"
+        className="absolute right-0 bg-accent h-full w-15 md:w-16 lg:w-17 flex items-center justify-center"
         aria-label="Add task"
       >
         {loading ? (
-          <LuLoaderCircle className="text-3xl text-background animate-spin" aria-hidden="true" />
+          <LuLoaderCircle
+            className="text-3xl text-background animate-spin"
+            aria-hidden="true"
+          />
         ) : (
-          <IoMdAddCircle className="text-3xl text-background" aria-hidden="true" />
+          <IoMdAddCircle
+            className="text-3xl text-background"
+            aria-hidden="true"
+          />
         )}
       </button>
     </form>

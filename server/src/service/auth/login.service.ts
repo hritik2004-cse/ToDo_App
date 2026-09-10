@@ -32,7 +32,7 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
   const updatedUser = await User.findOneAndUpdate(
     { _id: user._id, refreshToken: currentRefreshToken },
     { $set: { refreshToken: hashedRefreshToken } },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   if (!updatedUser) {
