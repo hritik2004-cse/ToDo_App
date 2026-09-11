@@ -33,7 +33,8 @@ server/
 │   │   ├── db.config.ts             # MongoDB connection (Mongoose)
 │   │   ├── env.config.ts            # Validated & exported environment variables
 │   │   ├── cookie.config.ts         # Shared CookieOptions (httpOnly, secure, sameSite)
-│   │   └── emailjs.config.ts        # sendEmail() helper via EmailJS REST API
+│   │   ├── emailjs.config.ts        # sendEmail() helper via EmailJS REST API
+│   │   └── cloudinary.config.ts     # Cloudinary SDK config (profile image uploads)
 │   ├── constants/
 │   │   └── auth.constants.ts        # Token maxAge values (accessTokenExpiry, refreshTokenExpiry)
 │   ├── routes/
@@ -45,14 +46,19 @@ server/
 │   │   ├── task.controller.ts       # Task route handlers
 │   │   └── user.controller.ts       # User route handlers
 │   ├── service/
-│   │   └── auth/
-│   │       ├── register.service.ts       # Registration + OTP email
-│   │       ├── login.service.ts          # Login + JWT issuance + refresh token rotation
-│   │       ├── account.service.ts        # Logout, delete account
-│   │       ├── verify-email.service.ts   # OTP verification
-│   │       └── password.service.ts       # Forget & reset password
+│   │   ├── auth/
+│   │   │   ├── register.service.ts       # Registration + OTP email
+│   │   │   ├── login.service.ts          # Login + JWT issuance + refresh token rotation
+│   │   │   ├── account.service.ts        # Logout, delete account
+│   │   │   ├── verify-email.service.ts   # OTP verification
+│   │   │   └── password.service.ts       # Forget & reset password
+│   │   ├── task/
+│   │   │   └── task.service.ts           # getAllTasks, addTask, updateTask, updateTaskStatus, deleteTask
+│   │   └── user/
+│   │       └── user.service.ts           # getUser (profile fetch)
 │   ├── models/
-│   │   └── user.model.ts            # Mongoose User schema
+│   │   ├── user.model.ts            # Mongoose User schema (bcrypt pre-save hook)
+│   │   └── task.model.ts            # Mongoose Task schema (userId ref, status, isCompleted)
 │   ├── dto/
 │   │   ├── auth/
 │   │   │   ├── login.dto.ts
@@ -70,10 +76,13 @@ server/
 │   ├── types/
 │   │   ├── express.types.ts         # Extends Express Request with userId: string
 │   │   ├── jwt.types.ts             # TokenPayload interface { sub: string }
-│   │   └── user.types.ts            # IUser interface for Mongoose
+│   │   ├── task.types.ts            # TaskItems interface for Mongoose (userId, task, status, isCompleted)
+│   │   ├── user.types.ts            # IUser interface for Mongoose (firstName, lastName, profileImg, etc.)
+│   │   └── email-js.types.ts        # SendEmailOptions & EmailTemplateParams interfaces
 │   └── utils/
 │       ├── app-error.utils.ts       # AppError class (statusCode + message)
 │       ├── jwt.utils.ts             # generateAccessToken, generateRefreshToken, verify*
+│       ├── mask-email.utils.ts      # maskEmail() helper — obfuscates email for OTP UX
 │       ├── otp.utils.ts             # OTP generation & hashing helpers
 │       └── token.utils.ts           # Generic token helpers
 ├── .env                     # Environment variables (gitignored)
@@ -91,7 +100,7 @@ Base URL: `http://localhost:{PORT}/api/v1`
 ### Health Check
 
 | Method | Endpoint  | Description        |
-|--------|-----------|--------------------|
+|--------|-----------|--------------------| 
 | `GET`  | `/health` | API liveness check |
 
 ### Auth — `/api/v1/auth`
@@ -154,6 +163,41 @@ All task routes require authentication (`authMiddle` applied at the router level
 |----------------|----------|---------------|---------------------|
 | `accessToken`  | ✅       | ✅            | `none` / `lax` (dev)|
 | `refreshToken` | ✅       | ✅            | `none` / `lax` (dev)|
+
+---
+
+## 🗄️ Data Models
+
+### User Model (`user.model.ts`)
+
+| Field               | Type      | Notes                                       |
+|---------------------|-----------|---------------------------------------------|
+| `firstName`         | `String`  | Required, trimmed                           |
+| `lastName`          | `String`  | Optional, default `""`                      |
+| `email`             | `String`  | Required, unique, lowercase                 |
+| `password`          | `String`  | Required, `select: false`, bcrypt-hashed    |
+| `isVerified`        | `Boolean` | Default `false`                             |
+| `verificationOTP`   | `String`  | Hashed OTP for email verification           |
+| `otpExpiry`         | `Date`    | OTP expiration timestamp                    |
+| `profileImg`        | `Object`  | `{ publicId: String, url: String }`         |
+| `refreshToken`      | `String`  | Hashed refresh token (rotation)             |
+| `resetToken`        | `String`  | Hashed password reset token                 |
+| `resetTokenExpiry`  | `Date`    | Reset token expiration timestamp            |
+| `createdAt`         | `Date`    | Auto (Mongoose timestamps)                  |
+| `updatedAt`         | `Date`    | Auto (Mongoose timestamps)                  |
+
+### Task Model (`task.model.ts`)
+
+| Field         | Type       | Notes                                        |
+|---------------|------------|----------------------------------------------|
+| `userId`      | `ObjectId` | Ref → `User`, required                       |
+| `task`        | `String`   | Required, trimmed                            |
+| `status`      | `String`   | Enum: `"pending"` / `"completed"`, default `"pending"` |
+| `isCompleted` | `Boolean`  | Default `false`                              |
+| `createdAt`   | `Date`     | Auto (Mongoose timestamps), used for sort    |
+| `updatedAt`   | `Date`     | Auto (Mongoose timestamps)                   |
+
+Tasks are always returned sorted by `createdAt` descending (newest first).
 
 ---
 
@@ -236,6 +280,7 @@ Request → Route → auth.middleware (guard) → validate.middleware (Zod) → 
 - **Middlewares** handle auth guarding (`auth.middleware`) and input validation (`validate-data.middleware`); errors are always passed via `next(error)`
 - **Controllers** handle HTTP request/response, call services, set cookies
 - **Services** contain all business logic, decoupled from HTTP
-- **Models** define MongoDB schemas
+- **Models** define MongoDB schemas (User with bcrypt pre-save hook, Task with `status` + `isCompleted` fields)
 - **DTOs** are Zod schemas that validate and type-infer request bodies
-- **Utils** provide `AppError`, JWT helpers, and OTP utilities
+- **Utils** provide `AppError`, JWT helpers, OTP utilities, and email masking (`mask-email.utils.ts`)
+- **Types** are shared TypeScript interfaces (`IUser`, `TaskItems`, `TokenPayload`, `SendEmailOptions`)
