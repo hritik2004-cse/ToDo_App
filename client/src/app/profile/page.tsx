@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import useAuth from "@/context/AuthContext";
 import NavBar from "@/components/main/NavBar";
 import { LuLoaderCircle } from "react-icons/lu";
+import Input from "@/components/utility/Input";
 
 const page = () => {
   const { user, userLoading, fetchCurrentUser } = useAuth();
@@ -42,23 +43,20 @@ const page = () => {
               </div>
             </figure>
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-              <input
+              <Input
                 type="text"
-                className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
                 defaultValue={user.firstname}
               />
-              <input
+              <Input
                 type="text"
-                className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
                 defaultValue={user.lastName}
               />
             </div>
-            <input
+            <Input
               type="email"
               name=""
               id=""
               defaultValue={user.email}
-              className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
             />
           </div>
         )}

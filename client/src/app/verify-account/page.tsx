@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import api from "@/config/axios.config";
 import { useRouter } from "next/navigation";
 import Button from "@/components/utility/Button";
+import Input from "@/components/utility/Input";
 import React, { ChangeEvent, SubmitEventHandler } from "react";
 
 const verifyAccountPage = () => {
@@ -83,14 +84,13 @@ const verifyAccountPage = () => {
           <b className="text-secondary-accent">{email}</b>. Please check your
           inbox (and spam folder) and enter the OTP to confirm your account.
         </p>
-        <input
+        <Input
           type="text"
           placeholder="OTP"
           value={otp}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setOtp(e.target.value)
           }
-          className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
           required
         />
         <Button

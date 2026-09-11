@@ -7,6 +7,7 @@ import api from "@/config/axios.config";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import Button from "@/components/utility/Button";
+import Input from "@/components/utility/Input";
 import { LoginFormData } from "@/types/login.types";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 import LinkButton from "@/components/utility/LinkButton";
@@ -69,17 +70,16 @@ const loginPage = () => {
         <p className="text-sm lg:text-base text-center text-foreground/70">
           Welcome back! Enter your credentials to continue.
         </p>
-        <input
+        <Input
           required
           type="email"
           name="email"
           value={form.email}
           onChange={handleChange}
           placeholder="Email Address"
-          className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
         />
         <div className="w-full h-auto flex items-center justify-center relative">
-          <input
+          <Input
             required
             minLength={8}
             maxLength={40}
@@ -88,7 +88,6 @@ const loginPage = () => {
             placeholder="Password"
             onChange={handleChange}
             type={showPassword ? "text" : "password"}
-            className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
           />
           <button
             type="button"

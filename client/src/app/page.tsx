@@ -62,7 +62,7 @@ export default function Home() {
                   <TaskInput fetchTasks={fetchTasks} />
                 </div>
               ) : (
-                <div className="w-full mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
+                <article className="w-full mx-auto flex flex-col items-center justify-between gap-2.5 lg:gap-3.5 xl:gap-3">
                   <LuInbox className="text-5xl lg:text-7xl xl:text-6xl text-foreground" />
                   <h2 className="text-foreground text-2xl lg:text-3xl xl:text-2xl font-bold">
                     No todos found?
@@ -79,14 +79,17 @@ export default function Home() {
                     <IoMdAddCircle className="text-2xl lg:text-3xl xl:text-2xl" />{" "}
                     Create a new task
                   </Button>
-                </div>
+                </article>
               )}
             </div>
           </section>
         ) : (
           <section className="w-full mt-8 flex items-center justify-center">
-            <div className="w-[95%] md:w-[90%] lg:w-[80%] xl:w-[75%] h-full flex flex-col">
-              <div className="w-full flex items-center justify-start gap-3 md:gap-4 mb-3 md:mb-4">
+            <article className="w-[95%] md:w-[90%] lg:w-[80%] xl:w-[75%] h-full flex flex-col">
+              <nav
+                aria-label="task filters"
+                className="w-full flex items-center justify-start gap-3 md:gap-4 mb-3 md:mb-4"
+              >
                 <button
                   className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "all" ? "bg-gray border-2 border-foreground" : ""}`}
                   onClick={() => setFilter("all")}
@@ -105,19 +108,36 @@ export default function Home() {
                 >
                   completed
                 </button>
-              </div>
+              </nav>
               <TaskInput fetchTasks={fetchTasks} />
-              {filterTasks.map((task) => (
-                <TaskModel
-                  id={task.id}
-                  key={task.id}
-                  name={task.task}
-                  fetchTasks={fetchTasks}
-                  updatedAt={task.updatedAt}
-                  isCompleted={task.isCompleted}
-                />
-              ))}
-            </div>
+
+              {filterTasks.length === 0 ? (
+                <div className="w-full min-h-[50vh] flex items-center justify-center">
+                  {filter === "completed" ? (
+                    <p className="text-sm md:text-base text-accent font-medium">
+                      All tasks are pending
+                    </p>
+                  ) : filter === "pending" ? (
+                    <p className="text-sm md:text-base text-accent font-medium">
+                      All tasks are completed
+                    </p>
+                  ) : (
+                    <p className=""></p>
+                  )}
+                </div>
+              ) : (
+                filterTasks.map((task) => (
+                  <TaskModel
+                    id={task.id}
+                    key={task.id}
+                    name={task.task}
+                    fetchTasks={fetchTasks}
+                    updatedAt={task.updatedAt}
+                    isCompleted={task.isCompleted}
+                  />
+                ))
+              )}
+            </article>
           </section>
         )}
       </main>

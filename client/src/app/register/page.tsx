@@ -7,6 +7,7 @@ import api from "@/config/axios.config";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import Button from "@/components/utility/Button";
+import Input from "@/components/utility/Input";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 import LinkButton from "@/components/utility/LinkButton";
 import type { RegisterFormData } from "@/types/register.types";
@@ -76,35 +77,32 @@ const registerPage = () => {
           Fill in your information to create your free account.
         </p>
         <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-4">
-          <input
+          <Input
             required
             type="text"
             name="firstName"
             value={form.firstName}
             onChange={handleChange}
             placeholder="First Name"
-            className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
           />
-          <input
+          <Input
             type="text"
             name="lastName"
             value={form.lastName}
             onChange={handleChange}
             placeholder="Last Name"
-            className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
           />
         </div>
-        <input
+        <Input
           required
           type="email"
           name="email"
           value={form.email}
           onChange={handleChange}
           placeholder="Email Address"
-          className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
         />
         <div className="w-full h-auto flex items-center justify-center relative">
-          <input
+          <Input
             required
             minLength={8}
             maxLength={40}
@@ -113,7 +111,6 @@ const registerPage = () => {
             placeholder="Password"
             onChange={handleChange}
             type={showPassword ? "text" : "password"}
-            className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
           />
           <button
             type="button"

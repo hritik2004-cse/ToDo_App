@@ -5,6 +5,7 @@ import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 import api from "@/config/axios.config";
 import Button from "@/components/utility/Button";
+import Input from "@/components/utility/Input";
 import type {
   LinkSentModelProps,
   ResetPasswordProps,
@@ -45,7 +46,7 @@ const PasswordResetForm = ({
         Enter your registered email address and we&apos;ll send you a password
         reset link to your inbox.
       </p>
-      <input
+      <Input
         type="email"
         name="email"
         id="email"
@@ -55,7 +56,6 @@ const PasswordResetForm = ({
         }}
         placeholder="Email Address"
         autoComplete="email"
-        className="border-2 border-foreground w-full pl-2 py-2 lg:py-3 lg:pl-3 placeholder:text-placeholder text-sm lg:text-base font-medium"
         required
       />
       <Button varient="new" type="submit">

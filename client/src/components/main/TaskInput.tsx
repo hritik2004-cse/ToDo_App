@@ -6,6 +6,7 @@ import api from "@/config/axios.config";
 import { IoMdAddCircle } from "react-icons/io";
 import { LuLoaderCircle } from "react-icons/lu";
 import { TaskInputProps } from "@/types/task.types";
+
 import React, { ChangeEvent, SubmitEventHandler } from "react";
 
 const TaskInput = ({ fetchTasks }: TaskInputProps) => {
@@ -36,7 +37,8 @@ const TaskInput = ({ fetchTasks }: TaskInputProps) => {
 
   return (
     <form
-      className="flex items-center justify-between py-3 border-2 border-foreground h-auto relative w-full"
+      className="border-2 border-foreground relative w-full"
+      style={{ minHeight: "3.5rem" }}
       onSubmit={handleAdd}
     >
       <label htmlFor="new-task-input" className="sr-only">
@@ -50,11 +52,11 @@ const TaskInput = ({ fetchTasks }: TaskInputProps) => {
         id="new-task-input"
         onChange={handleChange}
         placeholder="Type to add a new todo..."
-        className="h-10 w-full pl-3 outline-none placeholder:text-placeholder text-foreground text-base font-medium"
+        className="absolute inset-0 w-full h-full pl-3 pr-16 md:pr-17 bg-transparent outline-none placeholder:text-placeholder text-foreground text-sm lg:text-base font-medium"
       />
       <button
         type="submit"
-        className="absolute right-0 bg-accent h-full w-15 md:w-16 lg:w-17 flex items-center justify-center"
+        className="absolute right-0 top-0 h-full bg-accent w-15 md:w-16 lg:w-17 flex items-center justify-center z-10"
         aria-label="Add task"
       >
         {loading ? (
