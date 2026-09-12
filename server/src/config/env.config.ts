@@ -12,6 +12,7 @@ const {
   NODE_ENV,
   CLIENT_URL,
   MONGODB_URI,
+  CLOUDINARY_API_KEY,
   ACCESS_TOKEN_SECRET,
   EMAIL_JS_PUBLIC_KEY,
   EMAIL_JS_SERVICE_ID,
@@ -19,6 +20,8 @@ const {
   REFRESH_TOKEN_SECRET,
   EMAIL_JS_PRIVATE_KEY,
   REFRESH_TOKEN_EXPIRY,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_SECRET,
   EMAIL_JS_VERIFY_EMAIL_TEMPLATE_ID,
   EMAIL_JS_RESET_PASSWORD_TEMPLATE_ID,
 } = process.env;
@@ -97,12 +100,27 @@ if (!REFRESH_TOKEN_SECRET) {
   throw new Error("refresh token secret is not defined");
 }
 
+// cloudinary
+
+if (!CLOUDINARY_CLOUD_NAME) {
+  throw new Error("Cloudinary cloud name is not defined");
+}
+
+if (!CLOUDINARY_API_KEY) {
+  throw new Error("Cloudinary api key is not defined");
+}
+
+if (!CLOUDINARY_API_SECRET) {
+  throw new Error("Cloudinary api secret is not defined");
+}
+
 const env = {
   port: PORT,
   nodeEnv: NODE_ENV,
   clientUrl: CLIENT_URL,
   saltRounds: SALT_ROUNDS,
   mongoDbUri: MONGODB_URI,
+  cloudinaryApiKey: CLOUDINARY_API_KEY,
   emailjsPublicKey: EMAIL_JS_PUBLIC_KEY,
   emailjsServiceId: EMAIL_JS_SERVICE_ID,
   accessTokenSecret: ACCESS_TOKEN_SECRET,
@@ -111,7 +129,9 @@ const env = {
   emailjsPrivateKey: EMAIL_JS_PRIVATE_KEY,
   refreshTokenSecret: REFRESH_TOKEN_SECRET,
   refreshTokenExpiry: REFRESH_TOKEN_EXPIRY,
+  cloudinaryCloudName: CLOUDINARY_CLOUD_NAME,
   tokenExpiryDuration: TOKEN_EXPIRY_DURATION,
+  cloudinaryApiSecret: CLOUDINARY_API_SECRET,
   emailjsVerifyEmailTemplateId: EMAIL_JS_VERIFY_EMAIL_TEMPLATE_ID,
   emailjsResetPasswordTemplateId: EMAIL_JS_RESET_PASSWORD_TEMPLATE_ID,
 };

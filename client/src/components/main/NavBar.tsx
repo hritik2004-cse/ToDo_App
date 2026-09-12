@@ -20,15 +20,19 @@ const NavBar = () => {
         <Logo />
         {user ? (
           <div>
-            <Link href="/profile" className="">
+            <Link href="/profile" className="flex items-center justify-center gap-2">
               <Image
                 src={user?.profileImgUrl || "/temp.jpg"}
                 height={100}
                 width={100}
                 alt={`${user.firstname} ${user.lastName}'s profile img`}
                 loading="eager"
-                className="w-12 h-12 object-cover border-2 border-foreground"
+                className="w-10 h-10 md:h-12 md:w-12 lg:w-15 lg:h-15 rounded-full object-cover border-2 border-foreground"
               />
+              <div className="">
+                <p className="text-foreground/70 text-xs md:text-sm font-medium">Hi</p>
+                <h2 className="text-accent font-semibold text-base md:text-lg">{user.firstname} {user.lastName}</h2>
+              </div>
             </Link>
           </div>
         ) : (

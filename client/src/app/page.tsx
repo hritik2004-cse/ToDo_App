@@ -13,6 +13,7 @@ import { LuLoaderCircle } from "react-icons/lu";
 import Button from "@/components/utility/Button";
 import TaskInput from "@/components/main/TaskInput";
 import TaskModel from "@/components/main/TaskModel";
+import Image from "next/image";
 
 export default function Home() {
   const { fetchCurrentUser } = useAuth();
@@ -88,42 +89,67 @@ export default function Home() {
             <article className="w-[95%] md:w-[90%] lg:w-[80%] xl:w-[75%] h-full flex flex-col">
               <nav
                 aria-label="task filters"
-                className="w-full flex items-center justify-start gap-3 md:gap-4 mb-3 md:mb-4"
+                className="w-full flex items-center justify-between gap-3 md:gap-4 mb-3 md:mb-4"
               >
-                <button
-                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "all" ? "bg-gray border-2 border-foreground" : ""}`}
-                  onClick={() => setFilter("all")}
-                >
-                  all todos
-                </button>
-                <button
-                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "pending" ? "bg-gray border-2 border-foreground" : ""}`}
-                  onClick={() => setFilter("pending")}
-                >
-                  pending
-                </button>
-                <button
-                  className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "completed" ? "bg-gray border-2 border-foreground" : ""}`}
-                  onClick={() => setFilter("completed")}
-                >
-                  completed
-                </button>
+                <article className="w-full flex items-center justify-start gap-3">
+                  <button
+                    className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "all" ? "bg-gray border-2 border-foreground" : ""}`}
+                    onClick={() => setFilter("all")}
+                  >
+                    all
+                  </button>
+                  <button
+                    className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "pending" ? "bg-gray border-2 border-foreground" : ""}`}
+                    onClick={() => setFilter("pending")}
+                  >
+                    pending
+                  </button>
+                  <button
+                    className={`py-2 md:py-3 px-3 md:px-5 capitalize text-xs md:text-base font-medium ${filter === "completed" ? "bg-gray border-2 border-foreground" : ""}`}
+                    onClick={() => setFilter("completed")}
+                  >
+                    completed
+                  </button>
+                </article>
+                <div className="hidden md:flex items-center justify-end gap-2">
+                  <div className="capitalize text-sm md:text-base lg:text-lg font-semibold text-accent flex items-center justify-center gap-1">
+                    <h3>{filter}</h3>
+                    <h3>tasks:</h3>
+                  </div>
+                  <p className="text-sm md:text-base lg:text-lg font-medium">{filterTasks.length}</p>
+                </div>
               </nav>
               <TaskInput fetchTasks={fetchTasks} />
 
               {filterTasks.length === 0 ? (
                 <div className="w-full min-h-[50vh] flex items-center justify-center">
-                  {filter === "completed" ? (
-                    <p className="text-sm md:text-base text-accent font-medium">
-                      All tasks are pending
-                    </p>
-                  ) : filter === "pending" ? (
-                    <p className="text-sm md:text-base text-accent font-medium">
-                      All tasks are completed
-                    </p>
-                  ) : (
-                    <p className=""></p>
-                  )}
+                  <div className="flex flex-col items-center justify-center">
+                    <Image
+                      src="/task.gif"
+                      height={100}
+                      width={100}
+                      alt={`no ${filter} tasks found`}
+                      loading="lazy"
+                      className="h-60 md:h-80 w-auto"
+                    />
+                    {filter === "completed" ? (
+                      <div className="flex flex-col items-center justify-center">
+                        <h2 className="text-base  md:text-lg text-accent font-semibold">No completed task found</h2>
+                        <p className="text-xs md:text-sm text-foreground/70 font-medium">
+                          You can complete some tasks to show them here
+                        </p>
+                      </div>
+                    ) : filter === "pending" ? (
+                      <div className="flex flex-col items-center justify-center">
+                        <h2 className="text-base  md:text-lg text-accent font-semibold">No pending task found</h2>
+                        <p className="text-xs md:text-sm text-foreground/70 font-medium">
+                          You can add more tasks to show them here
+                        </p>
+                      </div>
+                    ) : (
+                      <p className=""></p>
+                    )}
+                  </div>
                 </div>
               ) : (
                 filterTasks.map((task) => (
