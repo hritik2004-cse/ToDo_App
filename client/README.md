@@ -72,7 +72,7 @@ client/
 │       └── task.types.ts         # Task, TaskModelProps, TaskInputProps
 ├── .env                          # Environment variables (gitignored)
 ├── components.json               # shadcn/ui config
-├── next.config.ts                # Next.js config (reactCompiler, removeConsole in production)
+├── next.config.ts                # Next.js config (reactCompiler, removeConsole, Cloudinary remotePatterns)
 └── tsconfig.json
 ```
 
@@ -80,14 +80,14 @@ client/
 
 ## 🌐 Pages
 
-| Route              | Page                        | Description                                        |
-|--------------------|-----------------------------|----------------------------------------------------|
-| `/`                | `page.tsx`                  | Task list — filter, add, complete & delete tasks   |
-| `/login`           | `login/page.tsx`            | User login with email & password                   |
-| `/register`        | `register/page.tsx`         | User registration                                  |
-| `/verify-account`  | `verify-account/page.tsx`   | Enter OTP sent to email to activate account        |
-| `/forget-password` | `forget-password/page.tsx`  | Request a password reset OTP                       |
-| `/profile`         | `profile/page.tsx`          | View/edit profile (avatar, name, email)            |
+| Route              | Page                        | Description                                                         |
+|--------------------|-----------------------------|---------------------------------------------------------------------|
+| `/`                | `page.tsx`                  | Task list — filter, add, complete & delete tasks                    |
+| `/login`           | `login/page.tsx`            | User login with email & password                                    |
+| `/register`        | `register/page.tsx`         | User registration                                                   |
+| `/verify-account`  | `verify-account/page.tsx`   | Enter OTP sent to email to activate account                         |
+| `/forget-password` | `forget-password/page.tsx`  | Request a password reset OTP                                        |
+| `/profile`         | `profile/page.tsx`          | View & edit profile, upload avatar (Cloudinary, 5MB limit, type check)|
 
 ---
 
@@ -139,7 +139,11 @@ The interceptor is registered as a **side-effect import** from `AuthContext.tsx`
 3. **Login** (`/login`) → server sets `accessToken` + `refreshToken` HTTP-only cookies → redirected to `/`
 4. **Silent Refresh** → Axios interceptor automatically refreshes the access token on `401` without user interaction
 5. **Forgot Password** (`/forget-password`) → user requests a reset OTP via email → resets password with OTP
-6. **Profile** (`/profile`) → authenticated user can view their avatar, name and email
+6. **Profile** (`/profile`) → authenticated user can view their avatar, name, and email:
+   - Upload new avatar with client validation (JPG, JPEG, PNG, WEBP; ≤ 5MB)
+   - Transmitted as `multipart/form-data` via `FormData` to `PATCH /api/v1/user/update-profile-img`
+   - Real-time loading indicator on the edit button
+   - Live update of user state via `fetchCurrentUser()` upon completion
 
 ### Auth Context (`src/context/AuthContext.tsx`)
 
@@ -223,5 +227,22 @@ compiler: {
   removeConsole: process.env.NODE_ENV === "production"
     ? { exclude: ["error"] }
     : false,
+}
+```
+
+---
+
+## 🖼️ Cloudinary Remote Images
+
+Next.js Image component requires external hostnames to be whitelisted for optimization. In `next.config.ts`:
+
+```ts
+images: {
+  remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "res.cloudinary.com",
+    },
+  ],
 }
 ```

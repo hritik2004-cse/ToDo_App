@@ -16,6 +16,8 @@ This is the **Express.js** REST API backend for the ToDo App. It handles authent
 | [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) | ^9.0.3 | Access & refresh JWT tokens |
 | [cookie-parser](https://github.com/expressjs/cookie-parser) | ^1.4.7 | HTTP-only cookie handling |
 | [cors](https://github.com/expressjs/cors) | ^2.8.6 | Cross-origin resource sharing |
+| [multer](https://github.com/expressjs/multer) | ^1.4.4 | Multipart/form-data upload handling (memory storage) |
+| [cloudinary](https://cloudinary.com/) | ^2.11.0 | Cloud media upload & asset management |
 | [dotenv](https://github.com/motdotla/dotenv) | ^17.4.2 | Environment variable loading |
 | [EmailJS](https://www.emailjs.com/) | REST API | Transactional OTP emails |
 | [tsx](https://github.com/privatenumber/tsx) | ^4.23 | TypeScript execution (dev) |
@@ -44,7 +46,7 @@ server/
 │   ├── controllers/
 │   │   ├── auth.controller.ts       # Auth route handlers
 │   │   ├── task.controller.ts       # Task route handlers
-│   │   └── user.controller.ts       # User route handlers
+│   │   └── user.controller.ts       # User route handlers (profile, avatar, password)
 │   ├── service/
 │   │   ├── auth/
 │   │   │   ├── register.service.ts       # Registration + OTP email
@@ -55,7 +57,7 @@ server/
 │   │   ├── task/
 │   │   │   └── task.service.ts           # getAllTasks, addTask, updateTask, updateTaskStatus, deleteTask
 │   │   └── user/
-│   │       └── user.service.ts           # getUser (profile fetch)
+│   │       └── user.service.ts           # getCurrentUser, updateProfile, updateProfileImg, confirmPassword, updatePassword
 │   ├── models/
 │   │   ├── user.model.ts            # Mongoose User schema (bcrypt pre-save hook)
 │   │   └── task.model.ts            # Mongoose Task schema (userId ref, status, isCompleted)
@@ -67,10 +69,14 @@ server/
 │   │   │   ├── resend-verify-email.dto.ts
 │   │   │   ├── forget-password.dto.ts
 │   │   │   └── reset-password.dto.ts
-│   │   └── tasks/
-│   │       └── add-task.dto.ts
+│   │   ├── tasks/
+│   │   │   └── add-task.dto.ts
+│   │   └── user/
+│   │       ├── update-profile.dto.ts     # Zod schema for profile name update
+│   │       └── update-password.dto.ts    # Zod schema for password update
 │   ├── middlewares/
 │   │   ├── auth.middleware.ts            # JWT access token guard (sets req.userId), passes errors to next()
+│   │   ├── upload.middleware.ts          # Multer memory storage middleware for file uploads
 │   │   ├── validate-data.middleware.ts   # Zod request body validation
 │   │   └── error-handler.middleware.ts   # Global error handler (AppError → status code, 500 fallback)
 │   ├── types/
@@ -78,6 +84,7 @@ server/
 │   │   ├── jwt.types.ts             # TokenPayload interface { sub: string }
 │   │   ├── task.types.ts            # TaskItems interface for Mongoose (userId, task, status, isCompleted)
 │   │   ├── user.types.ts            # IUser interface for Mongoose (firstName, lastName, profileImg, etc.)
+│   │   ├── profile-img.types.ts     # UpdateProfileImageDTO (Express.Multer.File)
 │   │   └── email-js.types.ts        # SendEmailOptions & EmailTemplateParams interfaces
 │   └── utils/
 │       ├── app-error.utils.ts       # AppError class (statusCode + message)
@@ -132,9 +139,14 @@ All task routes require authentication (`authMiddle` applied at the router level
 
 ### User — `/api/v1/user`
 
-| Method | Endpoint | Auth | Description                  |
-|--------|----------|------|------------------------------|
-| `GET`  | `/me`    | ✅   | Get logged-in user profile   |
+All user routes require authentication (`authMiddle` applied at the router level).
+
+| Method  | Endpoint              | Auth | Description                                                        |
+|---------|-----------------------|------|--------------------------------------------------------------------|
+| `GET`   | `/me`                 | ✅   | Get logged-in user profile                                         |
+| `POST`  | `/update-profile`     | ✅   | Update profile first name & last name (`updateProfileSchema`)      |
+| `POST`  | `/update-password`    | ✅   | Update account password (`updatePasswordSchema`)                   |
+| `PATCH` | `/update-profile-img` | ✅   | Upload & update profile image (`multipart/form-data` via Multer)   |
 
 ---
 
@@ -209,6 +221,7 @@ Tasks are always returned sorted by `createdAt` descending (newest first).
 - pnpm v11+
 - MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 - [EmailJS](https://www.emailjs.com/) account with a service, two templates, and API keys
+- [Cloudinary](https://cloudinary.com/) account with upload permissions (cloud name, API key, API secret)
 
 ### 1. Install dependencies
 
@@ -232,18 +245,23 @@ TOKEN_EXPIRY_DURATION=900000      # 15 minutes in ms
 MONGODB_URI=mongodb://localhost:27017/todo-app
 CLIENT_URL=http://localhost:3000
 
-# JWT
-ACCESS_TOKEN_SECRET=your_access_token_secret
-ACCESS_TOKEN_EXPIRY=15m
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
-REFRESH_TOKEN_EXPIRY=7d
-
 # EmailJS
 EMAIL_JS_SERVICE_ID=your_service_id
 EMAIL_JS_PUBLIC_KEY=your_public_key
 EMAIL_JS_PRIVATE_KEY=your_private_key
 EMAIL_JS_VERIFY_EMAIL_TEMPLATE_ID=your_verify_template_id
 EMAIL_JS_RESET_PASSWORD_TEMPLATE_ID=your_reset_template_id
+
+# JWT
+ACCESS_TOKEN_SECRET=your_access_token_secret
+ACCESS_TOKEN_EXPIRY=15m
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_EXPIRY=7d
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
 > All variables are validated at startup — the server throws immediately if any are missing or invalid.
@@ -268,19 +286,20 @@ pnpm start    # Run compiled production build
 ## 🏗️ Architecture
 
 ```
-Request → Route → auth.middleware (guard) → validate.middleware (Zod) → Controller → Service → MongoDB
-                                                                                         ↓
-                                                                                   EmailJS (OTP)
-                                                                                   jwt.utils (tokens)
+Request → Route → auth.middleware (guard) → upload.middleware (Multer) / validate (Zod) → Controller → Service → MongoDB
+                                                                                                           ↓
+                                                                                                     Cloudinary (upload/delete)
+                                                                                                     EmailJS (OTP)
+                                                                                                     jwt.utils (tokens)
                   ↓ errors
             error-handler.middleware (AppError → HTTP response)
 ```
 
 - **Routes** attach middlewares and controllers to endpoints
-- **Middlewares** handle auth guarding (`auth.middleware`) and input validation (`validate-data.middleware`); errors are always passed via `next(error)`
+- **Middlewares** handle auth guarding (`auth.middleware`), file uploads (`upload.middleware`), and input validation (`validate-data.middleware`); errors are always passed via `next(error)`
 - **Controllers** handle HTTP request/response, call services, set cookies
-- **Services** contain all business logic, decoupled from HTTP
-- **Models** define MongoDB schemas (User with bcrypt pre-save hook, Task with `status` + `isCompleted` fields)
+- **Services** contain all business logic (auth, tasks, user profile, Cloudinary image upload streams), decoupled from HTTP
+- **Models** define MongoDB schemas (User with bcrypt pre-save hook and `profileImg` sub-document, Task with `status` + `isCompleted` fields)
 - **DTOs** are Zod schemas that validate and type-infer request bodies
 - **Utils** provide `AppError`, JWT helpers, OTP utilities, and email masking (`mask-email.utils.ts`)
-- **Types** are shared TypeScript interfaces (`IUser`, `TaskItems`, `TokenPayload`, `SendEmailOptions`)
+- **Types** are shared TypeScript interfaces (`IUser`, `TaskItems`, `TokenPayload`, `SendEmailOptions`, `UpdateProfileImageDTO`)

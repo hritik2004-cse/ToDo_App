@@ -15,7 +15,10 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 - ✅ Create, view, complete, delete, and **inline-edit** tasks
 - 📌 Task status tracking with filter tabs (All / Pending / Completed)
 - ✏️ Inline task editing — clicking edit highlights the task border in accent color; save with one click
-- 👤 Profile page showing user info (first name, last name, email) with profile image support
+- 👤 Profile page with live user info (first name, last name, email) and profile avatar
+- 🖼️ Profile image upload with Cloudinary and Multer memory storage — automatic cleanup/deletion of old avatar on Cloudinary
+- 📝 Profile editing — update first name and last name
+- 🔒 Password management — update password with validation
 - 🌙 Dark-themed, responsive UI with accessibility support (ARIA labels, sr-only labels, unique IDs)
 - 🔒 Password & refresh token hashing with bcrypt
 - 🔁 Refresh token rotation with optimistic locking (prevents token reuse attacks)
@@ -23,7 +26,7 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 - 🌐 Environment-aware cookie security (`secure` + `sameSite` in production)
 - 🧹 Console logs automatically stripped in production builds (Next.js SWC compiler)
 - 🧩 Shared `Input` and `Button` utility components with types defined in `types/`
-- ☁️ Cloudinary integration config ready for profile image uploads
+- ☁️ Cloudinary integration for secure image hosting & Next.js Image remote pattern optimization
 
 ---
 
@@ -50,6 +53,7 @@ To-Do_List/
 - [pnpm](https://pnpm.io/) v11+
 - [MongoDB](https://www.mongodb.com/) instance (local or Atlas)
 - [EmailJS](https://www.emailjs.com/) account (for OTP emails)
+- [Cloudinary](https://cloudinary.com/) account (for profile image uploads)
 
 ### 1. Clone the repository
 
@@ -117,9 +121,12 @@ Base URL: `/api/v1`
 | `DELETE` | `/task/delete/:id`           | ✅   | Delete a task                   |
 
 ### User
-| Method | Route       | Auth | Description              |
-|--------|-------------|------|--------------------------|
-| `GET`  | `/user/me`  | ✅   | Get current user profile |
+| Method  | Route                    | Auth | Description                                         |
+|---------|--------------------------|------|-----------------------------------------------------|
+| `GET`   | `/user/me`               | ✅   | Get current user profile                            |
+| `POST`  | `/user/update-profile`   | ✅   | Update first name and last name                     |
+| `POST`  | `/user/update-password`  | ✅   | Update password with validation                     |
+| `PATCH` | `/user/update-profile-img`| ✅  | Upload & update profile image (Multer + Cloudinary) |
 
 ---
 
@@ -133,6 +140,7 @@ Base URL: `/api/v1`
 | Backend         | Express.js v5, TypeScript                                  |
 | Database        | MongoDB + Mongoose (User + Task models)                    |
 | Auth            | JWT (access + refresh rotation), bcrypt, HTTP-only cookies |
+| File Uploads    | Multer (memoryStorage), Cloudinary v2 SDK                  |
 | Email / OTP     | EmailJS                                                    |
 | Validation      | Zod (server), TypeScript (client)                          |
 | Package Manager | pnpm v11 (workspaces)                                      |
