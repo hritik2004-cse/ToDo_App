@@ -7,6 +7,17 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 const REFRESH_URL = "/auth/refresh";
 
+const IGNORED_REFRESH_ROUTES = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/verify-email",
+  "/auth/resend-verify-email",
+  "/auth/forget-password",
+  "/auth/resend-forget-password",
+  "/auth/reset-password",
+];
+
 let onAuthFailure: (() => void) | null = null;
 let isRefreshing = false;
 let refreshQueue: Array<{
@@ -34,12 +45,14 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
-    const isRefreshRequest = originalRequest?.url === REFRESH_URL;
+    const isIgnoredRoute = IGNORED_REFRESH_ROUTES.some((route) =>
+      originalRequest?.url?.includes(route),
+    );
 
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !isRefreshRequest
+      !isIgnoredRoute
     ) {
       originalRequest._retry = true;
 

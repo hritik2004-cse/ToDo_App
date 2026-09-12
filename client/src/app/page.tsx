@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 import api from "@/config/axios.config";
@@ -13,10 +15,10 @@ import { LuLoaderCircle } from "react-icons/lu";
 import Button from "@/components/utility/Button";
 import TaskInput from "@/components/main/TaskInput";
 import TaskModel from "@/components/main/TaskModel";
-import Image from "next/image";
 
 export default function Home() {
-  const { fetchCurrentUser } = useAuth();
+  const router = useRouter();
+  const { user, userLoading } = useAuth();
   const [tasks, setTasks] = React.useState<Task[]>([]);
   const [addTask, setAddTask] = React.useState<boolean>(false);
   const [filter, setFilter] = React.useState<"all" | "pending" | "completed">(
@@ -30,9 +32,12 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await api.get("/task/all");
-      fetchCurrentUser();
-      setTasks(response?.data?.tasks);
+      setTasks(response?.data?.tasks || []);
     } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 401) {
+        setTasks([]);
+        return;
+      }
       const errorMsg = isAxiosError(error)
         ? error?.response?.data?.message
         : "Unable to get tasks";
@@ -42,16 +47,15 @@ export default function Home() {
     }
   };
 
-  // on every mount the update tasks will be called to get all tasks from api
   React.useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [user]);
 
   return (
     <div className="w-full h-screen page">
       <NavBar />
       <main className="main">
-        {loading ? (
+        {loading || userLoading ? (
           <section className="w-full h-full flex items-center justify-center">
             <LuLoaderCircle className="text-3xl text-accent animate-spin" />
           </section>
@@ -75,7 +79,13 @@ export default function Home() {
                   <Button
                     varient="new"
                     className="gap-2"
-                    onClick={() => setAddTask(true)}
+                    onClick={() => {
+                      if (!user) {
+                        router.push("/login");
+                        return;
+                      }
+                      setAddTask(true);
+                    }}
                   >
                     <IoMdAddCircle className="text-2xl lg:text-3xl xl:text-2xl" />{" "}
                     Create a new task
@@ -116,7 +126,9 @@ export default function Home() {
                     <h3>{filter}</h3>
                     <h3>tasks:</h3>
                   </div>
-                  <p className="text-sm md:text-base lg:text-lg font-medium">{filterTasks.length}</p>
+                  <p className="text-sm md:text-base lg:text-lg font-medium">
+                    {filterTasks.length}
+                  </p>
                 </div>
               </nav>
               <TaskInput fetchTasks={fetchTasks} />
@@ -134,14 +146,18 @@ export default function Home() {
                     />
                     {filter === "completed" ? (
                       <div className="flex flex-col items-center justify-center">
-                        <h2 className="text-base  md:text-lg text-accent font-semibold">No completed task found</h2>
+                        <h2 className="text-base  md:text-lg text-accent font-semibold">
+                          No completed task found
+                        </h2>
                         <p className="text-xs md:text-sm text-foreground/70 font-medium">
                           You can complete some tasks to show them here
                         </p>
                       </div>
                     ) : filter === "pending" ? (
                       <div className="flex flex-col items-center justify-center">
-                        <h2 className="text-base  md:text-lg text-accent font-semibold">No pending task found</h2>
+                        <h2 className="text-base  md:text-lg text-accent font-semibold">
+                          No pending task found
+                        </h2>
                         <p className="text-xs md:text-sm text-foreground/70 font-medium">
                           You can add more tasks to show them here
                         </p>

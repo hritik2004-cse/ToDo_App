@@ -11,10 +11,12 @@ import Input from "@/components/utility/Input";
 import { LoginFormData } from "@/types/login.types";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 import LinkButton from "@/components/utility/LinkButton";
+import useAuth from "@/context/AuthContext";
 import React, { ChangeEvent, SubmitEventHandler } from "react";
 
 const loginPage = () => {
   const router = useRouter();
+  const { fetchCurrentUser } = useAuth();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const [form, setForm] = React.useState<LoginFormData>({
@@ -32,10 +34,12 @@ const loginPage = () => {
         password: form.password,
       });
 
+      await fetchCurrentUser();
+
       setForm({ email: "", password: "" });
 
       toast.success(response?.data?.message);
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/"), 1500);
     } catch (error) {
       const message = isAxiosError(error)
         ? error?.response?.data?.message
