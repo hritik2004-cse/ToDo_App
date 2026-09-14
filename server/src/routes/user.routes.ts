@@ -17,7 +17,7 @@ userRouter.use(authMiddle);
 userRouter.route("/me").get(getCurrentUser);
 userRouter
   .route("/update-profile")
-  .post(validate(updateProfileSchema), updateProfile);
+  .patch(validate(updateProfileSchema), updateProfile);
 userRouter
   .route("/update-password")
   .post(validate(updatePasswordSchema), updatePassword);
