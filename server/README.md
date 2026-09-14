@@ -144,7 +144,7 @@ All user routes require authentication (`authMiddle` applied at the router level
 | Method  | Endpoint              | Auth | Description                                                        |
 |---------|-----------------------|------|--------------------------------------------------------------------|
 | `GET`   | `/me`                 | ✅   | Get logged-in user profile                                         |
-| `POST`  | `/update-profile`     | ✅   | Update profile first name & last name (`updateProfileSchema`)      |
+| `PATCH` | `/update-profile`     | ✅   | Update profile first name & last name (`updateProfileSchema`)      |
 | `POST`  | `/update-password`    | ✅   | Update account password (`updatePasswordSchema`)                   |
 | `PATCH` | `/update-profile-img` | ✅   | Upload & update profile image (`multipart/form-data` via Multer)   |
 

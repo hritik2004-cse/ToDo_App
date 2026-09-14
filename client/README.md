@@ -12,12 +12,15 @@ This is the **Next.js** frontend for the ToDo App. It communicates with the Expr
 | [React](https://react.dev/) | 19.2.8 | UI library |
 | [TypeScript](https://www.typescriptlang.org/) | ^5 | Type safety |
 | [Tailwind CSS](https://tailwindcss.com/) | ^4 | Utility-first styling |
-| [shadcn/ui](https://ui.shadcn.com/) | ^4 | Accessible UI components (AlertDialog) |
-| [Base UI](https://base-ui.com/) | ^1.7 | Headless UI primitives (Dropdown) |
+| [shadcn/ui](https://ui.shadcn.com/) | ^4 | Accessible UI components (AlertDialog, DropdownMenu) |
+| [Base UI](https://base-ui.com/) | ^1.7 | Headless UI primitives (Dropdown, Tooltip) |
 | [Axios](https://axios-http.com/) | ^1.20 | HTTP client with response interceptor |
 | [React Icons](https://react-icons.github.io/react-icons/) | ^5.7 | Icon library |
+| [Lucide React](https://lucide.dev/) | ^1.39 | Additional icon library |
 | [React Toastify](https://fkhadra.github.io/react-toastify/) | ^11 | Toast notifications |
 | [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) | latest | Class name merging |
+| [class-variance-authority](https://cva.style/) | ^0.7 | Component variant management |
+| [tw-animate-css](https://github.com/Wombosvideo/tw-animate-css) | ^1.4 | Tailwind animation utilities |
 | pnpm | 11.24.0 | Package manager |
 
 ---
@@ -34,21 +37,40 @@ client/
 │   │   ├── globals.css           # Global styles & Tailwind theme tokens
 │   │   ├── manifest.json         # PWA web app manifest
 │   │   ├── login/
-│   │   │   └── page.tsx          # Login page (email + password, show/hide toggle)
+│   │   │   └── page.tsx          # Login page — renders <Login /> component
 │   │   ├── register/
-│   │   │   └── page.tsx          # Registration page
+│   │   │   └── page.tsx          # Registration page — renders <Register /> component
 │   │   ├── verify-account/
-│   │   │   └── page.tsx          # Email OTP verification page (post-register)
+│   │   │   └── page.tsx          # Email OTP verification page — renders <VerifyAccount />
 │   │   ├── forget-password/
-│   │   │   └── page.tsx          # Forget password page (OTP-based reset flow)
-│   │   └── profile/
-│   │       └── page.tsx          # Profile page (avatar, first name, last name, email)
+│   │   │   └── page.tsx          # Forget password page — renders <ForgetPassword />
+│   │   └── account/              # Account section (Sidebar layout)
+│   │       ├── layout.tsx        # Account layout (NavBar + Sidebar + main content)
+│   │       ├── profile/
+│   │       │   └── page.tsx      # Profile page — renders <Profile />
+│   │       ├── change-password/
+│   │       │   └── page.tsx      # Change password page — renders <ChangePassword />
+│   │       └── settings/
+│   │           └── page.tsx      # Settings page — renders <Settings />
 │   ├── components/
-│   │   ├── main/                 # Feature components
+│   │   ├── main/                 # Feature / layout components
 │   │   │   ├── NavBar.tsx        # Top navigation bar (logo, login/register or profile avatar link)
+│   │   │   ├── Sidebar.tsx       # Sidebar navigation for the account section
 │   │   │   ├── TaskInput.tsx     # New task form (accessible: sr-only label, aria-label on submit)
 │   │   │   └── TaskModel.tsx     # Individual task card (checkbox, inline edit, delete dialog, dropdown)
+│   │   ├── pages/                # Full-page client components (one per route)
+│   │   │   ├── Login.tsx         # Login form logic & UI
+│   │   │   ├── Register.tsx      # Registration form logic & UI
+│   │   │   ├── VerifyAccount.tsx # OTP verification logic & UI
+│   │   │   ├── ForgetPassword.tsx# Forget / reset password flow logic & UI
+│   │   │   ├── Profile.tsx       # Profile view & edit (avatar upload, name edit)
+│   │   │   ├── ChangePassword.tsx# Change password form logic & UI
+│   │   │   └── Settings.tsx      # Settings page UI
 │   │   ├── ui/                   # shadcn/ui + Base UI auto-generated components
+│   │   │   ├── alert-dialog.tsx  # AlertDialog (shadcn/ui) — used for delete confirmations
+│   │   │   ├── button.tsx        # shadcn/ui Button primitive
+│   │   │   ├── dropdown-menu.tsx # DropdownMenu (shadcn/ui) — used in task options
+│   │   │   └── tooltip.tsx       # Tooltip (Base UI) — accessible hover hints
 │   │   └── utility/              # Shared reusable components
 │   │       ├── Button.tsx        # Styled button (variants: primary, secondary, new, danger)
 │   │       ├── Input.tsx         # Styled input field
@@ -67,6 +89,7 @@ client/
 │       ├── button.types.ts       # ButtonVariant, ButtonProps
 │       ├── input.types.ts        # InputProps
 │       ├── login.types.ts        # LoginFormData
+│       ├── profile.types.ts      # ProfileData
 │       ├── register.types.ts     # RegisterFormData
 │       ├── reset-password.types.ts # ResetPasswordProps, LinkSentModelProps, StatusVarients
 │       └── task.types.ts         # Task, TaskModelProps, TaskInputProps
@@ -80,14 +103,18 @@ client/
 
 ## 🌐 Pages
 
-| Route              | Page                        | Description                                                         |
-|--------------------|-----------------------------|---------------------------------------------------------------------|
-| `/`                | `page.tsx`                  | Task list — filter, add, complete & delete tasks                    |
-| `/login`           | `login/page.tsx`            | User login with email & password                                    |
-| `/register`        | `register/page.tsx`         | User registration                                                   |
-| `/verify-account`  | `verify-account/page.tsx`   | Enter OTP sent to email to activate account                         |
-| `/forget-password` | `forget-password/page.tsx`  | Request a password reset OTP                                        |
-| `/profile`         | `profile/page.tsx`          | View & edit profile, upload avatar (Cloudinary, 5MB limit, type check)|
+| Route                     | Component                   | Description                                                           |
+|---------------------------|-----------------------------|-----------------------------------------------------------------------|
+| `/`                       | `page.tsx`                  | Task list — filter, add, complete & delete tasks                      |
+| `/login`                  | `Login.tsx`                 | User login with email & password                                      |
+| `/register`               | `Register.tsx`              | User registration                                                     |
+| `/verify-account`         | `VerifyAccount.tsx`         | Enter OTP sent to email to activate account                           |
+| `/forget-password`        | `ForgetPassword.tsx`        | Request a password reset OTP                                          |
+| `/account/profile`        | `Profile.tsx`               | View & edit profile, upload avatar (Cloudinary, 5MB limit, type check)|
+| `/account/change-password`| `ChangePassword.tsx`        | Change account password                                               |
+| `/account/settings`       | `Settings.tsx`              | Account settings & preferences                                        |
+
+> The `/account/*` routes share a common layout (`account/layout.tsx`) that wraps the content with **NavBar** and **Sidebar**.
 
 ---
 
@@ -96,7 +123,7 @@ client/
 - **Dark theme** with CSS custom properties defined in `globals.css`
 - **Color tokens:** `background`, `foreground`, `accent`, `secondary-accent`, `gray`, `placeholder`, `edit`, `delete`
 - **Typography:** Inter (primary), Geist Sans, Geist Mono via `next/font`
-- **Styling:** Tailwind CSS v4 with custom tokens
+- **Styling:** Tailwind CSS v4 with custom tokens + `tw-animate-css` for animation utilities
 
 ---
 
@@ -109,6 +136,7 @@ All interactive elements meet WCAG criteria:
 - Checkbox `id`s are unique per task (`taskStatus-{taskId}`) to avoid duplicate-ID violations
 - Decorative icons carry `aria-hidden="true"` so screen readers skip them
 - `sr-only` labels on screen-reader-only visually hidden labels
+- Tooltips on icon-only buttons via `<Tooltip>` (Base UI) for additional context
 
 ---
 
@@ -139,11 +167,10 @@ The interceptor is registered as a **side-effect import** from `AuthContext.tsx`
 3. **Login** (`/login`) → server sets `accessToken` + `refreshToken` HTTP-only cookies → redirected to `/`
 4. **Silent Refresh** → Axios interceptor automatically refreshes the access token on `401` without user interaction
 5. **Forgot Password** (`/forget-password`) → user requests a reset OTP via email → resets password with OTP
-6. **Profile** (`/profile`) → authenticated user can view their avatar, name, and email:
-   - Upload new avatar with client validation (JPG, JPEG, PNG, WEBP; ≤ 5MB)
-   - Transmitted as `multipart/form-data` via `FormData` to `PATCH /api/v1/user/update-profile-img`
-   - Real-time loading indicator on the edit button
-   - Live update of user state via `fetchCurrentUser()` upon completion
+6. **Account** (`/account/*`) → authenticated user can manage their account via Sidebar navigation:
+   - **Profile** (`/account/profile`) — view avatar, name, email; upload new avatar with client validation (JPG, JPEG, PNG, WEBP; ≤ 5MB); edit first/last name inline
+   - **Change Password** (`/account/change-password`) — update account password
+   - **Settings** (`/account/settings`) — account preferences
 
 ### Auth Context (`src/context/AuthContext.tsx`)
 
@@ -161,7 +188,7 @@ Individual task card with:
 - **Checkbox** — marks task as completed (optimistic UI, one-way — disabled once checked)
 - **Inline edit** — clicking the edit button makes the text input editable; border turns accent-colored; save with the save icon button
 - **Delete dialog** — AlertDialog confirmation before deleting (via shadcn/ui)
-- **Mobile dropdown** — ellipsis button reveals Edit / Delete options on small screens (via Base UI Dropdown)
+- **Mobile dropdown** — ellipsis button reveals Edit / Delete options on small screens (via shadcn/ui DropdownMenu)
 - **Date badge** — shows `updatedAt` date in `dd MMM yy` format (hidden on mobile)
 
 ### `TaskInput.tsx`
@@ -173,8 +200,23 @@ New task form:
 ### `NavBar.tsx`
 
 - Shows the **Logo** on the left
-- If **logged in**: shows a circular profile image linking to `/profile`
+- If **logged in**: shows a circular profile image linking to `/account/profile`
 - If **logged out**: shows Login button (all screens) + Get Started button (desktop only)
+
+### `Sidebar.tsx`
+
+- Sidebar navigation component rendered within the `/account/*` layout
+- Provides links to **Profile**, **Change Password**, and **Settings** pages
+
+### `tooltip.tsx` (Base UI)
+
+- Wraps Base UI's `Tooltip` primitives (`Provider`, `Root`, `Trigger`, `Content`, `Arrow`)
+- Used to add accessible hover hints on icon-only buttons and interactive UI elements
+
+### `dropdown-menu.tsx` (shadcn/ui)
+
+- Wraps shadcn/ui DropdownMenu primitives
+- Used in `TaskModel` for the mobile ellipsis menu (Edit / Delete actions)
 
 ---
 
@@ -246,3 +288,4 @@ images: {
   ],
 }
 ```
+

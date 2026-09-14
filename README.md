@@ -19,6 +19,7 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 - 🖼️ Profile image upload with Cloudinary and Multer memory storage — automatic cleanup/deletion of old avatar on Cloudinary
 - 📝 Profile editing — update first name and last name
 - 🔒 Password management — update password with validation
+- 🗂️ Account section with Sidebar navigation (Profile / Change Password / Settings)
 - 🌙 Dark-themed, responsive UI with accessibility support (ARIA labels, sr-only labels, unique IDs)
 - 🔒 Password & refresh token hashing with bcrypt
 - 🔁 Refresh token rotation with optimistic locking (prevents token reuse attacks)
@@ -27,6 +28,7 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 - 🧹 Console logs automatically stripped in production builds (Next.js SWC compiler)
 - 🧩 Shared `Input` and `Button` utility components with types defined in `types/`
 - ☁️ Cloudinary integration for secure image hosting & Next.js Image remote pattern optimization
+- 🔔 Tooltip UI component (Base UI) for accessible hover hints
 
 ---
 
@@ -121,12 +123,12 @@ Base URL: `/api/v1`
 | `DELETE` | `/task/delete/:id`           | ✅   | Delete a task                   |
 
 ### User
-| Method  | Route                    | Auth | Description                                         |
-|---------|--------------------------|------|-----------------------------------------------------|
-| `GET`   | `/user/me`               | ✅   | Get current user profile                            |
-| `POST`  | `/user/update-profile`   | ✅   | Update first name and last name                     |
-| `POST`  | `/user/update-password`  | ✅   | Update password with validation                     |
-| `PATCH` | `/user/update-profile-img`| ✅  | Upload & update profile image (Multer + Cloudinary) |
+| Method  | Route                     | Auth | Description                                         |
+|---------|---------------------------|------|-----------------------------------------------------|
+| `GET`   | `/user/me`                | ✅   | Get current user profile                            |
+| `PATCH` | `/user/update-profile`    | ✅   | Update first name and last name                     |
+| `POST`  | `/user/update-password`   | ✅   | Update password with validation                     |
+| `PATCH` | `/user/update-profile-img`| ✅   | Upload & update profile image (Multer + Cloudinary) |
 
 ---
 
