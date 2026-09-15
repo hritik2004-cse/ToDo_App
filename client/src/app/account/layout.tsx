@@ -7,13 +7,11 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <NavBar />
-
+    <div className="flex flex-col h-dvh">
+      <NavBar className="min-h-20"/>
       <div className="flex flex-1">
         <Sidebar />
-
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 md:p-8">{children}</main>
       </div>
     </div>
   );

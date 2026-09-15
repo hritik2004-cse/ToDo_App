@@ -5,6 +5,7 @@ import {
   updateProfileImg,
   updatePassword,
   getCurrentUser,
+  confirmPassword,
 } from "../controllers/user.controller.js";
 import validate from "../middlewares/validate-data.middleware.js";
 import { updateProfileSchema } from "../dto/user/update-profile.dto.js";
@@ -24,5 +25,8 @@ userRouter
 userRouter
   .route("/update-profile-img")
   .patch(upload.single("profileImg"), updateProfileImg);
+userRouter
+  .route("/confirm-password")
+  .post(validate(updatePasswordSchema), confirmPassword);
 
 export default userRouter;

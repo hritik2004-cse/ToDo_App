@@ -7,7 +7,6 @@ import api from "@/config/axios.config";
 import { TbEdit } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import useAuth from "@/context/AuthContext";
-import NavBar from "@/components/main/NavBar";
 import Input from "@/components/utility/Input";
 import { LuLoaderCircle } from "react-icons/lu";
 import { FaPen, FaRegSave } from "react-icons/fa";
@@ -103,17 +102,16 @@ const Profile = () => {
   };
 
   return (
-    <main className="flex flex-col h-full w-full page">
-      <section className="w-full h-full main flex items-center justify-center">
-        {userLoading || loading ? (
-          <div className="w-[95%] xl:w-[35%] border-2 border-foreground p-6 flex items-center justify-center">
-            <LuLoaderCircle className="animate-spin text-2xl text-accent" />
-          </div>
-        ) : !user ? null : (
-          <form
-            className="w-[95%] xl:w-[35%] border-2 border-foreground p-6 flex flex-col gap-4 relative"
-            onSubmit={editUserProfile}
-          >
+    <div className="h-full flex items-center justify-center">
+      {userLoading || loading ? (
+        <div className="w-[95%] lg:w-[40%] border-2 border-foreground p-6 flex items-center justify-center">
+          <LuLoaderCircle className="animate-spin text-2xl text-accent" />
+        </div>
+      ) : !user ? null : (
+        <form
+          className="w-[95%] xl:w-[40%] border-2 border-foreground p-6 flex flex-col gap-4 relative"
+          onSubmit={editUserProfile}
+        >
             <button
               type="button"
               className="absolute right-5 top-5 transition-all duration-300"
@@ -193,10 +191,9 @@ const Profile = () => {
               defaultValue={user?.email || ""}
               readOnly
             />
-          </form>
-        )}
-      </section>
-    </main>
+      </form>
+      )}
+    </div>
   );
 };
 

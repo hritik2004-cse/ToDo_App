@@ -3,17 +3,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "../utility/Logo";
+import useAuth from "@/context/AuthContext";
 import LinkButton from "../utility/LinkButton";
 import { FaArrowRightLong } from "react-icons/fa6";
-import useAuth from "@/context/AuthContext";
+import { useState } from "react";
+import Menu from "./Menu";
 
-const NavBar = () => {
+const NavBar = ({ className }: { className?: string }) => {
   const { user } = useAuth();
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
-    <nav className="w-full border-b-2 border-b-foreground flex items-center justify-center nav">
+    <nav
+      className={`w-full border-b-2 border-b-foreground flex items-center justify-center nav ${className}`}
+    >
       <div className="w-[95%] mx-auto flex items-center justify-between">
-        <Logo />
+        <div className="flex items-center justify-center gap-2">
+          <Menu open={open} setOpen={setOpen}/>
+          <Logo />
+        </div>
         {user ? (
           <div>
             <Link
@@ -26,9 +34,9 @@ const NavBar = () => {
                 loading="eager"
                 src={user?.profileImgUrl || "/temp.jpg"}
                 alt={`${user.firstname} ${user.lastName}'s profile img`}
-                className="w-10 h-10 md:h-12 md:w-12 lg:w-15 lg:h-15 rounded-full object-cover border-2 border-foreground"
+                className="h-12 w-12 lg:w-15 lg:h-15 rounded-full object-cover border-2 border-foreground"
               />
-              <div>
+              <div className="hidden md:flex flex-col items-start justify-center ">
                 <p className="text-foreground/70 text-xs md:text-sm font-medium">
                   Hi
                 </p>
