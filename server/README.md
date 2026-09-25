@@ -21,7 +21,7 @@ This is the **Express.js** REST API backend for the ToDo App. It handles authent
 | [dotenv](https://github.com/motdotla/dotenv) | ^17.4.2 | Environment variable loading |
 | [EmailJS](https://www.emailjs.com/) | REST API | Transactional OTP emails |
 | [tsx](https://github.com/privatenumber/tsx) | ^4.23 | TypeScript execution (dev) |
-| pnpm | 11.24.0 | Package manager |
+| pnpm | 12.4.1 | Package manager |
 
 ---
 
@@ -72,6 +72,7 @@ server/
 │   │   ├── tasks/
 │   │   │   └── add-task.dto.ts
 │   │   └── user/
+│   │       ├── confirm-password.dto.ts    # Zod schema for password verification before changes
 │   │       ├── update-profile.dto.ts     # Zod schema for profile name update
 │   │       └── update-password.dto.ts    # Zod schema for password update
 │   ├── middlewares/
@@ -145,7 +146,8 @@ All user routes require authentication (`authMiddle` applied at the router level
 |---------|-----------------------|------|--------------------------------------------------------------------|
 | `GET`   | `/me`                 | ✅   | Get logged-in user profile                                         |
 | `PATCH` | `/update-profile`     | ✅   | Update profile first name & last name (`updateProfileSchema`)      |
-| `POST`  | `/update-password`    | ✅   | Update account password (`updatePasswordSchema`)                   |
+| `POST`  | `/confirm-password`   | ✅   | Verify current password before allowing changes (`confirmPasswordSchema`) |
+| `PATCH` | `/update-password`    | ✅   | Update account password (`updatePasswordSchema`)                   |
 | `PATCH` | `/update-profile-img` | ✅   | Upload & update profile image (`multipart/form-data` via Multer)   |
 
 ---
@@ -254,9 +256,9 @@ EMAIL_JS_RESET_PASSWORD_TEMPLATE_ID=your_reset_template_id
 
 # JWT
 ACCESS_TOKEN_SECRET=your_access_token_secret
-ACCESS_TOKEN_EXPIRY=15m
+ACCESS_TOKEN_EXPIRY=20min
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
-REFRESH_TOKEN_EXPIRY=7d
+REFRESH_TOKEN_EXPIRY=5d
 
 # Cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name

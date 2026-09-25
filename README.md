@@ -18,15 +18,17 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 - 👤 Profile page with live user info (first name, last name, email) and profile avatar
 - 🖼️ Profile image upload with Cloudinary and Multer memory storage — automatic cleanup/deletion of old avatar on Cloudinary
 - 📝 Profile editing — update first name and last name
-- 🔒 Password management — update password with validation
+- 🔒 Two-step password change — confirm current password first, then set new password (prevents same-password reuse)
 - 🗂️ Account section with Sidebar navigation (Profile / Change Password / Settings)
+- 📱 Mobile drawer menu (Base UI Drawer) — swipeable sidebar navigation with logout on small screens
 - 🌙 Dark-themed, responsive UI with accessibility support (ARIA labels, sr-only labels, unique IDs)
 - 🔒 Password & refresh token hashing with bcrypt
 - 🔁 Refresh token rotation with optimistic locking (prevents token reuse attacks)
 - ✅ Input validation with Zod (server) and TypeScript (client)
 - 🌐 Environment-aware cookie security (`secure` + `sameSite` in production)
 - 🧹 Console logs automatically stripped in production builds (Next.js SWC compiler)
-- 🧩 Shared `Input` and `Button` utility components with types defined in `types/`
+- 🧩 Shared `Input`, `Button`, `LinkButton`, `SidebarLink`, and `Logo` utility components with types in `types/`
+- 📂 Data-driven sidebar links — link config lives in `data/sidebar-links.ts`, reused by both Sidebar and mobile Menu
 - ☁️ Cloudinary integration for secure image hosting & Next.js Image remote pattern optimization
 - 🔔 Tooltip UI component (Base UI) for accessible hover hints
 
@@ -127,7 +129,8 @@ Base URL: `/api/v1`
 |---------|---------------------------|------|-----------------------------------------------------|
 | `GET`   | `/user/me`                | ✅   | Get current user profile                            |
 | `PATCH` | `/user/update-profile`    | ✅   | Update first name and last name                     |
-| `POST`  | `/user/update-password`   | ✅   | Update password with validation                     |
+| `POST`  | `/user/confirm-password`  | ✅   | Verify current password before allowing changes     |
+| `PATCH` | `/user/update-password`   | ✅   | Update password with validation                     |
 | `PATCH` | `/user/update-profile-img`| ✅   | Upload & update profile image (Multer + Cloudinary) |
 
 ---
@@ -145,7 +148,7 @@ Base URL: `/api/v1`
 | File Uploads    | Multer (memoryStorage), Cloudinary v2 SDK                  |
 | Email / OTP     | EmailJS                                                    |
 | Validation      | Zod (server), TypeScript (client)                          |
-| Package Manager | pnpm v11 (workspaces)                                      |
+| Package Manager | pnpm v12 (workspaces)                                      |
 
 ---
 

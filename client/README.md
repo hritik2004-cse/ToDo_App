@@ -12,8 +12,8 @@ This is the **Next.js** frontend for the ToDo App. It communicates with the Expr
 | [React](https://react.dev/) | 19.2.8 | UI library |
 | [TypeScript](https://www.typescriptlang.org/) | ^5 | Type safety |
 | [Tailwind CSS](https://tailwindcss.com/) | ^4 | Utility-first styling |
-| [shadcn/ui](https://ui.shadcn.com/) | ^4 | Accessible UI components (AlertDialog, DropdownMenu) |
-| [Base UI](https://base-ui.com/) | ^1.7 | Headless UI primitives (Dropdown, Tooltip) |
+| [shadcn/ui](https://ui.shadcn.com/) | ^4 | Accessible UI components (AlertDialog, DropdownMenu, Drawer) |
+| [Base UI](https://base-ui.com/) | ^1.7 | Headless UI primitives (Dropdown, Tooltip, Drawer) |
 | [Axios](https://axios-http.com/) | ^1.20 | HTTP client with response interceptor |
 | [React Icons](https://react-icons.github.io/react-icons/) | ^5.7 | Icon library |
 | [Lucide React](https://lucide.dev/) | ^1.39 | Additional icon library |
@@ -21,7 +21,7 @@ This is the **Next.js** frontend for the ToDo App. It communicates with the Expr
 | [clsx](https://github.com/lukeed/clsx) + [tailwind-merge](https://github.com/dcastil/tailwind-merge) | latest | Class name merging |
 | [class-variance-authority](https://cva.style/) | ^0.7 | Component variant management |
 | [tw-animate-css](https://github.com/Wombosvideo/tw-animate-css) | ^1.4 | Tailwind animation utilities |
-| pnpm | 11.24.0 | Package manager |
+| pnpm | 12.4.1 | Package manager |
 
 ---
 
@@ -54,8 +54,9 @@ client/
 │   │           └── page.tsx      # Settings page — renders <Settings />
 │   ├── components/
 │   │   ├── main/                 # Feature / layout components
-│   │   │   ├── NavBar.tsx        # Top navigation bar (logo, login/register or profile avatar link)
-│   │   │   ├── Sidebar.tsx       # Sidebar navigation for the account section
+│   │   │   ├── Menu.tsx          # Mobile drawer navigation (Base UI Drawer) with sidebar links + logout
+│   │   │   ├── NavBar.tsx        # Top navigation bar (logo, Menu drawer, login/register or profile avatar link)
+│   │   │   ├── Sidebar.tsx       # Desktop sidebar navigation for the account section (data-driven links + logout)
 │   │   │   ├── TaskInput.tsx     # New task form (accessible: sr-only label, aria-label on submit)
 │   │   │   └── TaskModel.tsx     # Individual task card (checkbox, inline edit, delete dialog, dropdown)
 │   │   ├── pages/                # Full-page client components (one per route)
@@ -64,23 +65,27 @@ client/
 │   │   │   ├── VerifyAccount.tsx # OTP verification logic & UI
 │   │   │   ├── ForgetPassword.tsx# Forget / reset password flow logic & UI
 │   │   │   ├── Profile.tsx       # Profile view & edit (avatar upload, name edit)
-│   │   │   ├── ChangePassword.tsx# Change password form logic & UI
+│   │   │   ├── ChangePassword.tsx# Two-step change password: verify current → set new password
 │   │   │   └── Settings.tsx      # Settings page UI
 │   │   ├── ui/                   # shadcn/ui + Base UI auto-generated components
 │   │   │   ├── alert-dialog.tsx  # AlertDialog (shadcn/ui) — used for delete confirmations
 │   │   │   ├── button.tsx        # shadcn/ui Button primitive
+│   │   │   ├── drawer.tsx        # Drawer (Base UI) — mobile sidebar navigation
 │   │   │   ├── dropdown-menu.tsx # DropdownMenu (shadcn/ui) — used in task options
 │   │   │   └── tooltip.tsx       # Tooltip (Base UI) — accessible hover hints
 │   │   └── utility/              # Shared reusable components
 │   │       ├── Button.tsx        # Styled button (variants: primary, secondary, new, danger)
 │   │       ├── Input.tsx         # Styled input field
 │   │       ├── LinkButton.tsx    # Next.js Link styled as a button
-│   │       └── Logo.tsx          # App logo + name linking to "/"
+│   │       ├── Logo.tsx          # App logo + name linking to "/"
+│   │       └── SidebarLink.tsx   # Reusable sidebar link component (used by Sidebar & Menu)
 │   ├── config/
 │   │   ├── axios.config.ts       # Axios instance (baseURL + withCredentials)
 │   │   └── env.config.ts         # Typed & exported client env vars (NEXT_PUBLIC_SERVER_URL)
 │   ├── context/
 │   │   └── AuthContext.tsx       # AuthProvider — user state, fetchCurrentUser, interceptor wiring
+│   ├── data/
+│   │   └── sidebar-links.ts      # Sidebar link config (Profile, Change Password, Settings) — shared by Sidebar & Menu
 │   ├── lib/
 │   │   ├── axios.ts              # Response interceptor: silent token refresh with request queue
 │   │   └── utils.ts             # cn() helper (clsx + tailwind-merge)
@@ -89,9 +94,11 @@ client/
 │       ├── button.types.ts       # ButtonVariant, ButtonProps
 │       ├── input.types.ts        # InputProps
 │       ├── login.types.ts        # LoginFormData
+│       ├── menu.types.ts         # MenuProps (open, setOpen)
 │       ├── profile.types.ts      # ProfileData
 │       ├── register.types.ts     # RegisterFormData
 │       ├── reset-password.types.ts # ResetPasswordProps, LinkSentModelProps, StatusVarients
+│       ├── sidebar-links.types.ts # SidebarLinks, SidebarLinkProps
 │       └── task.types.ts         # Task, TaskModelProps, TaskInputProps
 ├── .env                          # Environment variables (gitignored)
 ├── components.json               # shadcn/ui config
@@ -111,7 +118,7 @@ client/
 | `/verify-account`         | `VerifyAccount.tsx`         | Enter OTP sent to email to activate account                           |
 | `/forget-password`        | `ForgetPassword.tsx`        | Request a password reset OTP                                          |
 | `/account/profile`        | `Profile.tsx`               | View & edit profile, upload avatar (Cloudinary, 5MB limit, type check)|
-| `/account/change-password`| `ChangePassword.tsx`        | Change account password                                               |
+| `/account/change-password`| `ChangePassword.tsx`        | Two-step password change: verify current → set new                    |
 | `/account/settings`       | `Settings.tsx`              | Account settings & preferences                                        |
 
 > The `/account/*` routes share a common layout (`account/layout.tsx`) that wraps the content with **NavBar** and **Sidebar**.
@@ -169,7 +176,7 @@ The interceptor is registered as a **side-effect import** from `AuthContext.tsx`
 5. **Forgot Password** (`/forget-password`) → user requests a reset OTP via email → resets password with OTP
 6. **Account** (`/account/*`) → authenticated user can manage their account via Sidebar navigation:
    - **Profile** (`/account/profile`) — view avatar, name, email; upload new avatar with client validation (JPG, JPEG, PNG, WEBP; ≤ 5MB); edit first/last name inline
-   - **Change Password** (`/account/change-password`) — update account password
+   - **Change Password** (`/account/change-password`) — two-step flow: first verify current password via `POST /user/confirm-password`, then set new password via `PATCH /user/update-password`
    - **Settings** (`/account/settings`) — account preferences
 
 ### Auth Context (`src/context/AuthContext.tsx`)
@@ -197,26 +204,53 @@ New task form:
 - Full-width input with an accent-colored submit button on the right
 - Shows a spinner while adding; `sr-only` label + `aria-label` for accessibility
 
-### `NavBar.tsx`
-
-- Shows the **Logo** on the left
-- If **logged in**: shows a circular profile image linking to `/account/profile`
-- If **logged out**: shows Login button (all screens) + Get Started button (desktop only)
-
-### `Sidebar.tsx`
-
-- Sidebar navigation component rendered within the `/account/*` layout
-- Provides links to **Profile**, **Change Password**, and **Settings** pages
-
 ### `tooltip.tsx` (Base UI)
 
 - Wraps Base UI's `Tooltip` primitives (`Provider`, `Root`, `Trigger`, `Content`, `Arrow`)
 - Used to add accessible hover hints on icon-only buttons and interactive UI elements
 
+### `drawer.tsx` (Base UI)
+
+- Wraps Base UI's `Drawer` primitives (`Root`, `Trigger`, `Content`, `Header`, `Footer`)
+- Used by `Menu.tsx` for the mobile sidebar drawer navigation
+
 ### `dropdown-menu.tsx` (shadcn/ui)
 
 - Wraps shadcn/ui DropdownMenu primitives
 - Used in `TaskModel` for the mobile ellipsis menu (Edit / Delete actions)
+
+### `Menu.tsx`
+
+Mobile drawer navigation:
+- Uses Base UI `Drawer` with left swipe direction
+- Shows `Logo` in header, data-driven sidebar links in the body, and a logout button in the footer
+- Controlled via `open`/`setOpen` props passed from `NavBar`
+- On link click: closes the drawer and navigates; active link highlighted with accent background
+
+### `NavBar.tsx`
+
+- Shows the **Menu** drawer trigger (hamburger icon, mobile only) and the **Logo** on the left
+- If **logged in**: shows a circular profile image with user name linking to `/account/profile`
+- If **logged out**: shows Login button (all screens) + Get Started button (desktop only)
+
+### `Sidebar.tsx`
+
+- Desktop-only sidebar navigation component rendered within the `/account/*` layout
+- Uses data-driven links from `data/sidebar-links.ts` via `SidebarLink` component
+- Includes a logout button at the bottom
+- Active link highlighted with accent background and bold text
+
+### `SidebarLink.tsx`
+
+- Reusable link component shared by both `Sidebar` (desktop) and `Menu` (mobile drawer)
+- Renders a `next/link` with icon + label, accepts custom `className` and optional `onClick` override
+
+### `ChangePassword.tsx`
+
+Two-step password change flow:
+1. **Step 1 — Verify current password**: user enters current password → `POST /user/confirm-password`
+2. **Step 2 — Set new password**: user enters new + confirm new password with show/hide toggles, real-time match indicator; submit disabled until passwords match → `PATCH /user/update-password`
+- Back button to return to step 1
 
 ---
 
@@ -225,7 +259,7 @@ New task form:
 ### Prerequisites
 
 - Node.js v18+
-- pnpm v11+
+- pnpm v12+
 
 ### 1. Install dependencies
 
