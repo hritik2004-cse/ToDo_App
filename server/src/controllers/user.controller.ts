@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
   confirmPasswordService,
   getCurrentUserService,
+  updatePasswordService,
   updateProfileImgService,
   updateProfileService,
 } from "../service/user/user.service.js";
@@ -25,7 +26,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const confirmPassword = async (req: Request, res: Response) => {
   await confirmPasswordService(req.body, req.userId);
 
-  return res.status(200).json({ success: true, message: "Passwprd confirmed" });
+  return res.status(200).json({ success: true, message: "Password confirmed" });
 };
 
 export const updateProfileImg = async (req: Request, res: Response) => {
@@ -36,6 +37,7 @@ export const updateProfileImg = async (req: Request, res: Response) => {
 };
 
 export const updatePassword = async (req: Request, res: Response) => {
+  await updatePasswordService(req.body, req.userId);
   return res
     .status(200)
     .json({ success: true, message: "Password updated successfully" });

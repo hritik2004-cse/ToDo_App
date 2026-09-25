@@ -6,6 +6,7 @@ import cloudinary from "../../config/cloudinary.config.js";
 import type { UpdateProfileDTO } from "../../dto/user/update-profile.dto.js";
 import type { UpdateProfileImageDTO } from "../../types/profile-img.types.js";
 import type { UpdatePasswordDTO } from "../../dto/user/update-password.dto.js";
+import type { ConfirmPasswordDTO } from "../../dto/user/confirm-password.dto.js";
 
 // get current user service
 export const getCurrentUserService = async (userId: string) => {
@@ -97,7 +98,7 @@ export const updateProfileImgService = async (
 
 // confirm password service
 export const confirmPasswordService = async (
-  data: UpdatePasswordDTO,
+  data: ConfirmPasswordDTO,
   userId: string,
 ) => {
   const user = await User.findById({ _id: userId }).select("+password");
@@ -120,12 +121,18 @@ export const updatePasswordService = async (
   userId: string,
 ) => {
   const user = await User.findById(userId).select("+password");
-  const { password } = data;
+  const { newPassword } = data;
 
   if (!user) {
     throw new AppError(404, "Account not found");
   }
 
-  user.password = password;
+  const isMatching = await bcrypt.compare(newPassword, user.password);
+
+  if (isMatching) {
+    throw new AppError(401, "You cannot use same password");
+  }
+
+  user.password = newPassword;
   await user.save();
 };
