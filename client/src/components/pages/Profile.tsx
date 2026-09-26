@@ -15,8 +15,8 @@ import { ChangeEvent, SubmitEventHandler, useEffect, useState } from "react";
 
 const Profile = () => {
   const router = useRouter();
-  const { user, userLoading, fetchCurrentUser } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
+  const { user, userLoading, fetchCurrentUser } = useAuth();
   const [editProfile, setEditprofile] = useState<boolean>(false);
   const [profileImgLoading, setProfileImageLoading] = useState<boolean>(false);
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -41,6 +41,7 @@ const Profile = () => {
     }
   }, [userLoading, user, router]);
 
+  // function for edit user profile
   const editUserProfile: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e?.preventDefault();
     setLoading(true);
@@ -58,10 +59,12 @@ const Profile = () => {
     }
   };
 
+  // profile change handler
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setProfileData({ ...profileData, [e.target.name]: e.target.value });
   };
 
+  // function for updating profile image
   const updateProfileImg = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

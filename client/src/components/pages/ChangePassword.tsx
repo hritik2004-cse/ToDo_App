@@ -6,12 +6,14 @@ import Button from "../utility/Button";
 import { toast } from "react-toastify";
 import api from "@/config/axios.config";
 import useAuth from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { LuLoaderCircle } from "react-icons/lu";
 import { IoIosArrowBack } from "react-icons/io";
 import React, { SubmitEventHandler } from "react";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
 const ChangePassword = () => {
+  const router = useRouter();
   const { userLoading, user } = useAuth();
   const [password, setPassword] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -25,6 +27,7 @@ const ChangePassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] =
     React.useState<boolean>(false);
 
+  // verify password function
   const verifyPassword: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
@@ -43,6 +46,7 @@ const ChangePassword = () => {
     }
   };
 
+  // function to change password
   const changePassword: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
@@ -64,6 +68,7 @@ const ChangePassword = () => {
     }
   };
 
+  // useEffect for change password
   React.useEffect(() => {
     if (
       newPassword.length > 0 &&
@@ -75,6 +80,13 @@ const ChangePassword = () => {
       setMatching(false);
     }
   }, [newPassword, confirmNewPassword]);
+
+  // Redirect to login if user is not authenticated
+  React.useEffect(() => {
+    if (!userLoading && !user) {
+      router.push("/login");
+    }
+  }, [userLoading, user, router]);
 
   return (
     <div className="h-full flex items-center justify-center relative">
