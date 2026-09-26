@@ -38,11 +38,48 @@ A full-stack Todo application built with a **Next.js** frontend and an **Express
 
 ``````
 To-Do_List/
-├── client/          # Next.js frontend
-│   └── README.md    # Frontend details
-├── server/          # Express.js backend
-│   └── README.md    # Backend details
-└── README.md        # ← You are here
+├── client/                          # Next.js frontend
+│   ├── src/
+│   │   ├── app/                     # App Router pages
+│   │   │   ├── layout.tsx           # Root layout (AuthProvider, fonts, metadata, ToastContainer)
+│   │   │   ├── page.tsx             # Home / task list (filter, add, complete, delete)
+│   │   │   ├── globals.css          # Global styles & Tailwind theme tokens
+│   │   │   ├── manifest.json        # PWA web app manifest
+│   │   │   ├── login/               # Login page
+│   │   │   ├── register/            # Registration page
+│   │   │   ├── verify-account/      # Email OTP verification page
+│   │   │   ├── forget-password/     # Forget / reset password page
+│   │   │   └── account/             # Account section (NavBar + Sidebar layout)
+│   │   │       ├── layout.tsx       # Account layout
+│   │   │       ├── profile/         # Profile page
+│   │   │       ├── change-password/  # Change password page
+│   │   │       └── settings/        # Settings page (delete account)
+│   │   ├── components/
+│   │   │   ├── main/                # Feature / layout components (NavBar, Sidebar, Menu, TaskInput, TaskModel)
+│   │   │   ├── pages/               # Full-page client components (Login, Register, Profile, etc.)
+│   │   │   ├── ui/                  # shadcn/ui + Base UI components (AlertDialog, Drawer, Dropdown, Tooltip)
+│   │   │   └── utility/             # Shared components (Button, Input, LinkButton, Logo, SidebarLink)
+│   │   ├── config/                  # Axios instance & typed env vars
+│   │   ├── context/                 # AuthContext (user state, fetchCurrentUser, interceptor wiring)
+│   │   ├── data/                    # Data-driven configs (sidebar-links.ts)
+│   │   ├── lib/                     # Axios interceptor (silent token refresh) & cn() utility
+│   │   └── types/                   # Shared TypeScript types
+│   └── README.md                    # Frontend details
+├── server/                          # Express.js backend
+│   ├── src/
+│   │   ├── server.ts                # Entry point — Express app setup & server start
+│   │   ├── config/                  # DB, env, cookie, EmailJS, Cloudinary configs
+│   │   ├── constants/               # Token maxAge values
+│   │   ├── routes/                  # Auth, Task, User route definitions
+│   │   ├── controllers/             # Route handlers (auth, task, user)
+│   │   ├── service/                 # Business logic (auth/, task/, user/)
+│   │   ├── models/                  # Mongoose schemas (User, Task)
+│   │   ├── dto/                     # Zod validation schemas (auth/, tasks/, user/)
+│   │   ├── middlewares/             # Auth guard, Multer upload, Zod validation, error handler
+│   │   ├── types/                   # Shared TypeScript interfaces
+│   │   └── utils/                   # AppError, JWT, OTP, email masking helpers
+│   └── README.md                    # Backend details
+└── README.md                        # ← You are here
 ``````
 
 > See [client/README.md](./client/README.md) for frontend setup and [server/README.md](./server/README.md) for backend setup.
@@ -54,7 +91,7 @@ To-Do_List/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v18+
-- [pnpm](https://pnpm.io/) v11+
+- [pnpm](https://pnpm.io/) v12+
 - [MongoDB](https://www.mongodb.com/) instance (local or Atlas)
 - [EmailJS](https://www.emailjs.com/) account (for OTP emails)
 - [Cloudinary](https://cloudinary.com/) account (for profile image uploads)
@@ -139,16 +176,16 @@ Base URL: `/api/v1`
 
 | Layer           | Technology                                                 |
 |-----------------|------------------------------------------------------------|
-| Frontend        | Next.js 16, React 19, TypeScript                           |
-| Styling         | Tailwind CSS v4, Base UI, shadcn/ui                        |
-| HTTP Client     | Axios with response interceptor (silent token refresh)     |
-| Backend         | Express.js v5, TypeScript                                  |
-| Database        | MongoDB + Mongoose (User + Task models)                    |
-| Auth            | JWT (access + refresh rotation), bcrypt, HTTP-only cookies |
-| File Uploads    | Multer (memoryStorage), Cloudinary v2 SDK                  |
-| Email / OTP     | EmailJS                                                    |
-| Validation      | Zod (server), TypeScript (client)                          |
-| Package Manager | pnpm v12 (workspaces)                                      |
+| Frontend        | Next.js 16.3, React 19.2, TypeScript 5                     |
+| Styling         | Tailwind CSS v4, Base UI 1.7, shadcn/ui 4                  |
+| HTTP Client     | Axios 1.20 with response interceptor (silent token refresh)|
+| Backend         | Express.js 5.2, TypeScript 7                               |
+| Database        | MongoDB + Mongoose 9.9 (User + Task models)                |
+| Auth            | JWT (access + refresh rotation), bcrypt 6, HTTP-only cookies|
+| File Uploads    | Multer 1.4 (memoryStorage), Cloudinary v2 SDK              |
+| Email / OTP     | EmailJS (REST API)                                         |
+| Validation      | Zod 4 (server), TypeScript (client)                        |
+| Package Manager | pnpm 12.4                                                  |
 
 ---
 

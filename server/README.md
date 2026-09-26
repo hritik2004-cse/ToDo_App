@@ -220,7 +220,7 @@ Tasks are always returned sorted by `createdAt` descending (newest first).
 ### Prerequisites
 
 - Node.js v18+
-- pnpm v11+
+- pnpm v12+
 - MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 - [EmailJS](https://www.emailjs.com/) account with a service, two templates, and API keys
 - [Cloudinary](https://cloudinary.com/) account with upload permissions (cloud name, API key, API secret)

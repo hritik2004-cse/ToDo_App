@@ -66,7 +66,7 @@ client/
 │   │   │   ├── ForgetPassword.tsx# Forget / reset password flow logic & UI
 │   │   │   ├── Profile.tsx       # Profile view & edit (avatar upload, name edit)
 │   │   │   ├── ChangePassword.tsx# Two-step change password: verify current → set new password
-│   │   │   └── Settings.tsx      # Settings page UI
+│   │   │   └── Settings.tsx      # Settings page — delete account with confirmation
 │   │   ├── ui/                   # shadcn/ui + Base UI auto-generated components
 │   │   │   ├── alert-dialog.tsx  # AlertDialog (shadcn/ui) — used for delete confirmations
 │   │   │   ├── button.tsx        # shadcn/ui Button primitive
@@ -119,7 +119,7 @@ client/
 | `/forget-password`        | `ForgetPassword.tsx`        | Request a password reset OTP                                          |
 | `/account/profile`        | `Profile.tsx`               | View & edit profile, upload avatar (Cloudinary, 5MB limit, type check)|
 | `/account/change-password`| `ChangePassword.tsx`        | Two-step password change: verify current → set new                    |
-| `/account/settings`       | `Settings.tsx`              | Account settings & preferences                                        |
+| `/account/settings`       | `Settings.tsx`              | Account settings — permanently delete account                         |
 
 > The `/account/*` routes share a common layout (`account/layout.tsx`) that wraps the content with **NavBar** and **Sidebar**.
 
