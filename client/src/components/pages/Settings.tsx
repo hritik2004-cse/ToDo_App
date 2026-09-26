@@ -45,8 +45,9 @@ const Settings = () => {
           <LuLoaderCircle className="text-accent text-2xl animate-spin" />
         </section>
       ) : !user ? null : (
-        <section className="flex flex-col">
-          <article className="bg-gray p-3 border-2 border-foreground flex items-center justify-between">
+        <section className="flex flex-col w-[95%] mx-auto">
+          <h1 className="capitalize text-xl font-semibold text-accent my-3">settings</h1>
+          <article className="bg-gray p-3 border-2 border-foreground flex items-center justify-between mt-3">
             <div className="flex flex-col items-start justify-center">
               <h2 className="text-accent text-lg font-semibold">
                 Delete Account
